@@ -3,13 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="./style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>goclub tools</title>
   </head>
   <body>
   <div id="app" style="padding:2em;" >
     <h1>
-      goclub
+      <el-link style="font-size:1.6em;" href="http://t.goclub.run">t.goclub.run</el-link>
     </h1>
     <el-tabs v-model="activeTool"  @tab-click="changeTag" >
       <el-tab-pane label="model" name="model">

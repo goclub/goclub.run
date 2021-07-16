@@ -15,7 +15,7 @@ components[GenUUID.name] = GenUUID
 const TAG_KEY = "tag_key_v1"
 const data = function () {
     return {
-        activeTool: localStorage.getItem(TAG_KEY) || "enum"
+        activeTool: qs.parse(location.search).kind || localStorage.getItem(TAG_KEY)
     }
 }
 const methods = {
