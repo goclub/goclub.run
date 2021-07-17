@@ -29,3 +29,4 @@ var app = new Vue({
     data,
     methods,
 })
+app.$el.style.display="block"
