@@ -86,7 +86,7 @@ export default `
                    <el-input v-model="row.comment"  > </el-input>
                </td>
                <td>
-                   <el-button  @click="removeFieldsItem($index)" size="mini" type="danger" icon="el-icon-remove"></el-button>
+                   <el-button  @click="removeFieldsItem(index)" size="mini" type="danger" icon="el-icon-remove"></el-button>
                </td>
            </tr>
         </table>
