@@ -12,16 +12,15 @@ components[SpecEnum.name] = SpecEnum
 components[SpecModel.name] = SpecModel
 components[GenQrcode.name] = GenQrcode
 components[GenUUID.name] = GenUUID
-const TAG_KEY = "tag_key_v1"
 const data = function () {
     return {
-        activeTool: qs.parse(location.search).kind || localStorage.getItem(TAG_KEY) || "model"
+        activeTool: qs.parse(location.search).kind || "model"
     }
 }
 const methods = {
     changeTag: function (value, e) {
         const vm = this
-        localStorage.setItem(TAG_KEY, vm.activeTool)
+        history.pushState({}, "", `${location.pathname}?kind=${vm.activeTool}`);
     }
 }
 var app = new Vue({
