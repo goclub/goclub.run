@@ -1,6 +1,6 @@
 import tpl from "./tpl.js"
 
-import * as copy from "copy-to-clipboard"
+import copy from "copy-to-clipboard"
 import {v4 as uuidv4} from "uuid"
 const components = {
 
