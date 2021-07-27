@@ -32,7 +32,7 @@ type <#= v.structName #> struct {
 <# v.fields.forEach(function (item) { -#>
 <# if (item.comment) { #>    // <#= item.comment #>
 <# } -#>
-    <#= h.padGoField(item) #><#= h.padGoType(item) #> \`db:"<#= item.column #>"<# if (item.isAutoIncrement) {#> sq:"ignoreInsert" sq:"ignoreUpdate" <#}#><# if (item.isPrimaryKey && !item.isAutoIncrement) {#>sq:"ignoreUpdate" <#}#>\`
+    <#= h.padGoField(item) #><#= h.padGoType(item) #> \`db:"<#= item.column #>"<#- h.sqTag(item)#>\`
 <# }) -#>
     Table<#= v.structName #>
     <#= v.fieldCreateUpdate #>

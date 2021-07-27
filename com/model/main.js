@@ -81,6 +81,20 @@ export default {
                 }
                 return type.padEnd(maxGoTypeLength, " ")
             }
+            function sqTag(item) {
+                var tagItems = []
+                if (item.isAutoIncrement) {
+                    tagItems.push("ignoreInsert")
+                    tagItems.push("ignoreUpdate")
+                }
+                if (item.isPrimaryKey && !item.isAutoIncrement) {
+                    tagItems.push("ignoreUpdate")
+                }
+                if (tagItems.length == 0) {
+                    return ''
+                }
+                return ` sql:"${tagItems.join('|')}"`
+            }
             return ejs.render(code, {
                 c: {
                     notSetPrimaryKey: function() {
@@ -158,6 +172,7 @@ export default {
                     padGoField,
                     padGoType,
                     padGolFieldValue,
+                    sqTag,
                 },
             }, {delimiter: "#"})
         },
