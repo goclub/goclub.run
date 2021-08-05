@@ -4,3 +4,19 @@
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
+.icp-link {
+    margin-left: auto;
+    margin-right: auto;
+    color:#409EFF;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+}
+.import-name {
+    font-size:2em;
+    font-weight: bold;
+    color:#409EFF;
+    padding-right: .5em;
+}

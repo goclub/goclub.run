@@ -5,27 +5,80 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="stylesheet" href="./style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>goclub tools</title>
+    <title>goclub.run</title>
   </head>
   <body>
   <div id="app" style="padding:2em;display:none;" >
     <h1>
-      <el-link style="font-size:1.6em;" href="http://t.goclub.run">t.goclub.run</el-link>
+      <el-link target="_blank" style="font-size:1.6em;" href="https://github.com/goclub">github.com/goclub</el-link>
     </h1>
     <el-tabs v-model="activeTool"  @tab-click="changeTag" >
-      <el-tab-pane label="model" name="model">
+        <el-tab-pane label="开源项目" name="repo">
+            <el-collapse accordion>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">sql</span>基于 sqlx 实现更易用的sql, 接口优雅的同时媲美 sqlx 的性能
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/sql/"></iframe>
+            </el-collapse-item>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">error</span>错误处理指南和错误码
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/error/"></iframe>
+            </el-collapse-item>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">http</span>Go 官方 net/http 标准库和 mux 的扩展, 对错误处理友好
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/http/"></iframe>
+            </el-collapse-item>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">session</span>安全易用的 session golang 库
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/session/"></iframe>
+            </el-collapse-item>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">validator</span>类型安全的结构体数据验证器
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/validator/"></iframe>
+            </el-collapse-item>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">json</span>go 宽容的JSON处理, Marshal 支持 nil => [] , Unmarshal 支持 string => int or float
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/json/"></iframe>
+            </el-collapse-item>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">captcha</span> 图形验证码(基于steambap/captcha)
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/captcha/"></iframe>
+            </el-collapse-item>
+            <el-collapse-item>
+              <template slot="title">
+                <span class="import-name">time</span> time 的一些便捷扩展
+              </template>
+              <iframe style="border:none;width:100%;height:100vh;" src="https://goclub.run/time/"></iframe>
+            </el-collapse-item>
+          </el-collapse>
+        </el-tab-pane>
+        <el-tab-pane label="二维码" name="qrcode">
+          <gen-qrcode></gen-qrcode>
+        </el-tab-pane>
+      <el-tab-pane label="SQL模型" name="model">
         <spec-model></spec-model>
       </el-tab-pane>
-      <el-tab-pane label="enum" name="enum">
+      <el-tab-pane label="GO枚举" name="enum">
         <spec-enum></spec-enum>
-      </el-tab-pane>
-      <el-tab-pane label="QRCode" name="qrcode">
-        <gen-qrcode></gen-qrcode>
       </el-tab-pane>
       <el-tab-pane label="UUID" name="uuid">
         <gen-uuid></gen-uuid>
       </el-tab-pane>
     </el-tabs>
+    <a class="icp-link" href="https://beian.miit.gov.cn/">沪ICP备2021012662号-4</a>
   </div>
   <script>/* PrismJS 1.23.0
 https://prismjs.com/download.html#themes=prism-solarizedlight&languages=markup+css+clike+javascript+go */

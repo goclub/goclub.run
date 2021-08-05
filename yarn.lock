@@ -138,6 +138,10 @@ function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.nlark.com/function-bind/download/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
 
+github-buttons@^2.8.0:
+  version "2.18.1"
+  resolved "https://registry.nlark.com/github-buttons/download/github-buttons-2.18.1.tgz#93737ca38dd6a108799ebbbce7bafc46eb80c535"
+
 has-flag@^3.0.0:
   version "3.0.0"
   resolved "https://registry.nlark.com/has-flag/download/has-flag-3.0.0.tgz?cache=0&sync_timestamp=1618847009337&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fhas-flag%2Fdownload%2Fhas-flag-3.0.0.tgz#b5d454dc2199ae225699f3467e5a07f3b955bafd"
@@ -291,6 +295,12 @@ vite@^2.4.2:
     rollup "^2.38.5"
   optionalDependencies:
     fsevents "~2.3.2"
+
+vue-github-button@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.npm.taobao.org/vue-github-button/download/vue-github-button-1.3.0.tgz#a4da317a3b93d05824768b3916a0d22fa91603be"
+  dependencies:
+    github-buttons "^2.8.0"
 
 vue@2.6.12:
   version "2.6.12"

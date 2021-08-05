@@ -4,6 +4,9 @@ import * as ejs from "ejs"
 import { snakeCase } from "snake-case"
 import copy from "copy-to-clipboard"
 
+
+
+
 const components = {
 
 }
@@ -95,6 +98,11 @@ export default {
                 }
                 return ` sql:"${tagItems.join('|')}"`
             }
+            function hasPrimaryKey() {
+                return v.fields.some(function(item) {
+                    return item.isPrimaryKey
+                })
+            }
             return ejs.render(code, {
                 c: {
                     notSetPrimaryKey: function() {
@@ -173,6 +181,7 @@ export default {
                     padGoType,
                     padGolFieldValue,
                     sqTag,
+                    hasPrimaryKey,
                 },
             }, {delimiter: "#"})
         },

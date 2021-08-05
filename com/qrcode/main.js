@@ -17,6 +17,9 @@ export default {
     },
     created: function () {
         const vm = this
+        setTimeout(function(){
+            vm.$refs.qrcodeInput.focus()
+        }, 100)
         setTimeout(function callee() {
             let data = JSON.stringify(vm.form)
             localStorage.setItem(FORM_KEY, data)
@@ -27,7 +30,14 @@ export default {
     methods: {
         clickRenderButton: function () {
             this.render = this.form.qrcode
+            const vm = this
             if (this.render.trim() != "") {
+                let repeat  = this.form.history.some(function(item) {
+                    return vm.render == item.content
+                })
+                if (repeat) {
+                    return
+                }
                 this.form.history = this.form.history.concat({
                     content: this.render,
                     time: dateFormat("yyyy-MM-dd hh:mm:ss"),
@@ -36,6 +46,7 @@ export default {
         },
         useHistory: function (text) {
             this.render = text
+            this.form.qrcode = text
         },
         delHistory: function (text) {
             this.form.history = this.form.history.filter(function (item) {

@@ -1,11 +1,14 @@
 export default `
 <div>
  <el-form label-width="8em" size="mini" >
+     <el-form-item label="文档">
+         <el-link href="https://goclub.run/sql/" target="_blank" >goclub/sql</el-link>
+     </el-form-item>
     <el-form-item label="示例配置">
-        <el-button size="mini" type="primary" @click="useUserExampleData" >user</el-button>       
+        <el-button size="mini" type="primary" @click="useUserExampleData" >user</el-button>
     </el-form-item>
     <el-form-item label="package">
-        <el-input style="width:10em;" placeholder="eg:user" v-model="model.packageName"></el-input>       
+        <el-input style="width:10em;" placeholder="eg:user" v-model="model.packageName"></el-input>
     </el-form-item>
     <el-form-item label="name">
         struct:<el-input style="width:12em;" placeholder="eg:User" v-model="model.structName"  @blur="blurModelStructName" ></el-input>
@@ -22,7 +25,7 @@ export default `
             ></el-option>
         </el-select>
         <div v-if="model.softDelete == 'custom'" style="padding-left:2em;opacity: 0.8;">
-            SoftDeleteWhere: 
+            SoftDeleteWhere:
             <br />
             <el-input style="width:30em;" v-model="model.customSoftDelete.SoftDeleteWhere"/>
             <br />
@@ -47,10 +50,10 @@ export default `
                 <tr>
                     <th>主键</th>
                     <th>自增</th>
+                    <th>ID别名</th>
                     <th>GO字段</th>
                     <th>GO类型</th>
                     <th>table column</th>
-                    <th>ID类型别名</th>
                     <th>注释</th>
                     <th>操作</th>
                 </tr>
@@ -61,6 +64,9 @@ export default `
                </td>
                <td>
                     <el-switch v-model="row.isAutoIncrement" @change="changeIsAutoIncrement(row,index)" > </el-switch>
+               </td>
+               <td>
+                <el-switch v-if="row.isPrimaryKey" v-model="row.isIDTypeAlias"></el-switch>
                </td>
                <td>
                     <el-input v-model="row.goField"  @blur="blurGoFieldsItem(index)" > </el-input>
@@ -74,13 +80,10 @@ export default `
                            :value="item"
                        ></el-option>
                    </el-select>
-                    <el-input v-if="row.goType == 'custom'"  style="width:12em;"  placeholder="eg:UserLevel" v-model="row.goTypeCustom" ></el-input>                  
+                    <el-input v-if="row.goType == 'custom'"  style="width:12em;"  placeholder="eg:UserLevel" v-model="row.goTypeCustom" ></el-input>
                </td>
                <td>
                    <el-input v-model="row.column"  > </el-input>
-               </td>
-               <td>
-                   <el-switch v-model="row.isIDTypeAlias"></el-switch>
                </td>
                <td>
                    <el-input v-model="row.comment"  > </el-input>

@@ -8,6 +8,7 @@ import (
 
 <# v.fields.forEach(function (item) { -#>
 <# if(item.isPrimaryKey && item.isIDTypeAlias) {-#>
+// ID别名
 type ID<#- v.structName #> <#- item.goType #>
 func NewID<#- v.structName #>(id <#- item.goType #>) ID<#- v.structName #> {
     return ID<#- v.structName #>(id)
@@ -39,11 +40,15 @@ type <#= v.structName #> struct {
     sq.DefaultLifeCycle
 }
 func (v <#= v.structName #>) PrimaryKey() []sq.Condition {
+<# if (!h.hasPrimaryKey()) { -#>
+    panic("missing set primary key")
+<# } -#>
     return sq.And(
     <# v.fields.forEach(function (item) { -#><# if (item.isPrimaryKey) {#> v.Column().<#= item.goField #>, sq.Equal(v.<#= item.goField #>), <#}#>  <# }) #>
     )
 }
 <# if (c.hasAutoIncrement()){#>
+// 创建后自增字段赋值处理
 func (v *<#= v.structName #>) AfterCreate(result sql.Result) error {
     id, err := result.LastInsertId(); if err != nil {
         return err
