@@ -19,4 +19,11 @@
     font-weight: bold;
     color:#409EFF;
     padding-right: .5em;
+    display: inline;
+    min-width: 4em;
+}
+.el-collapse-item__header {
+    min-height: 48px   ;
+    height: auto !important;
+    line-height: 1.5 !important;
 }

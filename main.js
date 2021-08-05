@@ -19,14 +19,26 @@ components[GenQrcode.name] = GenQrcode
 components[GenUUID.name] = GenUUID
 const data = function () {
     return {
-        activeTool: qs.parse(location.search).k || "repo"
+        activeTool: qs.parse(location.search).k || "repo",
+        repos: [
+            ["sql", "基于 sqlx 实现更易用的sql, 接口优雅的同时媲美 sqlx 的性能"],
+            ["error", "错误处理指南和错误码"],
+            ["http", "Go 官方 net/http 标准库和 mux 的扩展, 对错误处理友好"],
+            ["session", "安全易用的 session golang 库"],
+            ["validator", "类型安全的结构体数据验证器"],
+            ["json", "go 宽容的JSON处理, Marshal 支持 nil => [] , Unmarshal 支持 string => int or float"],
+            ["time", "time 的一些便捷扩展"],
+        ]
     }
 }
 const methods = {
     changeTag: function (value, e) {
         const vm = this
         history.pushState({}, "", `${location.pathname}?k=${vm.activeTool}`);
-    }
+    },
+    handleChangeCollapse: function(v,b) {
+        console.log(v);
+    },
 }
 var app = new Vue({
     el: '#app',
@@ -34,7 +46,7 @@ var app = new Vue({
     data,
     methods,
     created: function () {
-        
+
     }
 })
 
