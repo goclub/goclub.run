@@ -39,7 +39,7 @@ text-align: center;
 }
 @media only screen and (max-width: 64em){
     body  {
-
+        padding: 0em;
     }
     .repo-iframe {
         display:none;
