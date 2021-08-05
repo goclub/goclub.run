@@ -1,7 +1,7 @@
 export default `
 <div>
-<el-form label-width="4em" size="mini" >
-   <el-form-item label="内容">
+<el-form size="mini" >
+   <el-form-item label="">
        <el-tag style="cursor: pointer;" size="mini" @click="addPrefix('https://')">https://</el-tag>
        <el-tag style="cursor: pointer;" size="mini"  @click="addPrefix('http://')">http://</el-tag>
        <el-input ref="qrcodeInput" placeholder="请输入二维码内容" type="textarea" v-model="form.qrcode" ></el-input>
@@ -11,17 +11,17 @@ export default `
    </el-form-item>
    </el-form>
  <el-row>
- <el-col :span="10">
-     <div style="padding-left: 3.6em;">
+ <el-col :span="10" :xs="12">
+     <div style="padding-left: 0em;">
        <div style="padding:1em;background: white;border:1px solid #ddd;display:inline-block;" >
            <qrcode-vue :value="result" :size="form.size" ></qrcode-vue>
        </div>
        <div style="padding-top: 1em;">
-       尺寸: <el-input-number :step="20"  v-model="form.size"  :min="50" :max="300" ></el-input-number>
+       尺寸: <el-input-number :step="20"  v-model="form.size"  :min="50" :max="330" ></el-input-number>
        </div>
      </div>
    </el-col>
-   <el-col :span="14">
+   <el-col :span="14" :xs="24" >
 
      <div>最近生成的二维码</div>
      <table style="width:100%;">
@@ -29,7 +29,7 @@ export default `
             <tr style="text-align:left;" >
             <th>内容</th>
             <th>时间</th>
-            <th>操作</th>
+            <th style="min-width:3em;">操作</th>
             </tr>
         </thead>
         <tr v-for="item in form.history" style="line-height:2em;">

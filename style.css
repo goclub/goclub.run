@@ -3,6 +3,16 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+    background: white;
+    min-height: 100vh;
+    display:none;
+    padding: 2em;
+    border-radius: .4em;
+
+}
+body {
+    padding: 2em;
+    background: url(https://picsum.photos/seed/some/3840/2160?blur=2) no-repeat;
 }
 .icp-link {
     margin-left: auto;
@@ -28,6 +38,9 @@ text-align: center;
     line-height: 1.5 !important;
 }
 @media only screen and (max-width: 64em){
+    body  {
+
+    }
     .repo-iframe {
         display:none;
     }

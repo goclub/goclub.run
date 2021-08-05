@@ -6,15 +6,18 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>goclub.run</title>
-  <script type="module" crossorigin src="/assets/index.51398807.js"></script>
+  <script type="module" crossorigin src="/assets/index.915cd715.js"></script>
   <link rel="modulepreload" href="/assets/vendor.4f83bef4.js">
-  <link rel="stylesheet" href="/assets/index.eb27d541.css">
+  <link rel="stylesheet" href="/assets/index.3cec60ff.css">
 </head>
   <body>
-  <div id="app" style="padding:1em;display:none;" >
+  <div id="app"  >
     <h1>
         <el-link style="font-size:1em;"  target="_blank" type="primary" href="https://github.com/goclub">goclub.run</el-link>
     </h1>
+    <p>
+      GO语言工具库/编程实践/教学项目/实战项目
+    </p>
     <el-tabs v-model="activeTool"  @tab-click="changeTag" >
         <el-tab-pane label="开源项目" name="repo"  >
             <el-collapse accordion  @change="handleChangeCollapse" >
@@ -22,7 +25,7 @@
               <template slot="title" :name="item[0]" >
                 <span class="import-name">{{item[0]}}</span>{{item[1]}}
               </template>
-              <el-link  type="primary" target="_blank" style="text-decoration:underline;font-size:2em;" :href="'https://goclub.run/' + item[0] + '/'">https://goclub.run/{{item[0]}}/</el-link>
+              <a target="_blank" style="color:#409EFF;text-decoration:underline;font-size:2em;" :href="'https://goclub.run/' + item[0] + '/'">https://goclub.run/{{item[0]}}/</a>
               <iframe class="repo-iframe" style="border:none;width:100%;height:100vh;" :src="'https://goclub.run/' + item[0] + '/'"></iframe>
             </el-collapse-item>
           </el-collapse>
