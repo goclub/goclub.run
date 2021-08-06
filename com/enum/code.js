@@ -1,5 +1,5 @@
 export default `
-// Generate by https://t.goclub.run
+// Generate by https://goclub.run
 // ---------------------- DO NOT EDIT (Begin) ----------------------
 // Source enums:
 // <#- JSON.stringify(v) #>
