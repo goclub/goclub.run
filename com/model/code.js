@@ -36,7 +36,7 @@ type <#= v.structName #> struct {
     <#= h.padGoField(item) #><#= h.padGoType(item) #> \`db:"<#= item.column #>"<#- h.sqTag(item)#>\`
 <# }) -#>
     Table<#= v.structName #>
-    <#= v.fieldCreateUpdate #>
+    <# if (v.fieldCreateUpdate != "without") { #><#= v.fieldCreateUpdate #><# } #>
     sq.DefaultLifeCycle
 }
 func (v <#= v.structName #>) PrimaryKey() []sq.Condition {
