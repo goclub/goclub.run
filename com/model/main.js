@@ -310,7 +310,7 @@ export default {
                     'sq.CreatedAtUpdatedAt',
                     'sq.CreateTimeUpdateTime',
                     'sq.GMTCreateGMTUpdate',
-                    'without',
+                    '无',
                 ]
             },
             default: {

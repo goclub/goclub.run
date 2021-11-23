@@ -36,7 +36,7 @@ type <#= v.structName #> struct {
     <#= h.padGoField(item) #><#= h.padGoType(item) #> \`db:"<#= item.column #>"<#- h.sqTag(item)#>\`
 <# }) -#>
     Table<#= v.structName #>
-    <# if (v.fieldCreateUpdate != "without") { #><#= v.fieldCreateUpdate #><# } #>
+    <# if (v.fieldCreateUpdate != "无") { #><#= v.fieldCreateUpdate #><# } #>
     sq.DefaultLifeCycle
 }
 <# if (c.hasAutoIncrement()){#>
