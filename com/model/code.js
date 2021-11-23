@@ -39,14 +39,6 @@ type <#= v.structName #> struct {
     <# if (v.fieldCreateUpdate != "without") { #><#= v.fieldCreateUpdate #><# } #>
     sq.DefaultLifeCycle
 }
-func (v <#= v.structName #>) PrimaryKey() []sq.Condition {
-<# if (!h.hasPrimaryKey()) { -#>
-    panic("missing set primary key")
-<# } -#>
-    return sq.And(
-    <# v.fields.forEach(function (item) { -#><# if (item.isPrimaryKey) {#> v.Column().<#= item.goField #>, sq.Equal(v.<#= item.goField #>), <#}#>  <# }) #>
-    )
-}
 <# if (c.hasAutoIncrement()){#>
 // 创建后自增字段赋值处理
 func (v *<#= v.structName #>) AfterCreate(result sql.Result) error {

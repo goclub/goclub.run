@@ -3,6 +3,7 @@ import code from "./code.js";
 import * as ejs from "ejs"
 import { snakeCase } from "snake-case"
 import copy from "copy-to-clipboard"
+import dayjs from "dayjs"
 
 
 
@@ -197,6 +198,17 @@ export default {
         }, 0)
     },
     methods: {
+        copyMigrateName() {
+            const vm = this
+            copy(vm.migrateName())
+            vm.$message({
+                message: '迁移函数名已复制到粘贴板',
+                type: "success",
+            });
+        },
+        migrateName() {
+            return "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm")
+        },
         label(value){
             if (value == "custom") {
                 return "自定义"

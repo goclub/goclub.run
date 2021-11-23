@@ -1,8 +1,11 @@
 export default `
 <div>
  <el-form label-width="8em" size="mini" >
+     <el-form-item label="迁移函数名">
+        <el-button @click="copyMigrateName">{{migrateName()}} </el-button>    
+    </el-form-item>
      <el-form-item label="文档">
-         <el-link href="https://goclub.run/sql/" target="_blank" >goclub/sql</el-link>
+         <el-link type="primary" href="https://goclub.run/sql/" target="_blank" >goclub/sql</el-link>
      </el-form-item>
     <el-form-item label="示例配置">
         <el-button size="mini" type="primary" @click="useUserExampleData" >user</el-button>
