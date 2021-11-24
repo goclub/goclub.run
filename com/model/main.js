@@ -200,14 +200,11 @@ export default {
     methods: {
         copyMigrateName() {
             const vm = this
-            copy(vm.migrateName())
+            copy(vm.migrateName)
             vm.$message({
                 message: '迁移函数名已复制到粘贴板',
                 type: "success",
             });
-        },
-        migrateName() {
-            return "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm")
         },
         label(value){
             if (value == "custom") {
@@ -285,6 +282,7 @@ export default {
             }
         }
         return {
+            migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm"),
             options: {
                 softDelete: [
                     'custom',
