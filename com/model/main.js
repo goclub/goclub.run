@@ -148,10 +148,10 @@ export default {
                             code = `CreatedAt sq.Column\n\tUpdatedAt sq.Column`
                             break
                             case "sq.CreateTimeUpdateTime":
-                                code = `CreateTime sq.Column\n\tUpdateTime sql.Column`
+                                code = `CreateTime sq.Column\n\tUpdateTime sq.Column`
                                 break
                             case "sq.GMTCreateGMTUpdate":
-                                code = `GMTCreate sq.Column\n\tGMTUpdate sql.Column`
+                                code = `GMTCreate sq.Column\n\tGMTUpdate sq.Column`
                                 break
                             default:
                         }

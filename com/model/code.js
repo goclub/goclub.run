@@ -1,5 +1,5 @@
 export default `
-// Generate by https://goclub.run
+// Package m Generate by https://goclub.run
 package <#- v.packageName #>
 import (
     "database/sql"
