@@ -1,5 +1,4 @@
-export default `
-// Package m Generate by https://goclub.run
+export default `// Package m Generate by https://goclub.run/?k=model
 package <#- v.packageName #>
 import (
     "database/sql"
@@ -8,7 +7,7 @@ import (
 
 <# v.fields.forEach(function (item) { -#>
 <# if(item.isPrimaryKey && item.isIDTypeAlias) {-#>
-// ID别名
+// ID<#- v.structName #> ID别名
 type ID<#- v.structName #> <#- item.goType #>
 func NewID<#- v.structName #>(id <#- item.goType #>) ID<#- v.structName #> {
     return ID<#- v.structName #>(id)
@@ -27,7 +26,7 @@ type Table<#- v.structName #> struct {
 func (Table<#- v.structName #>) SoftDeleteWhere() Raw {<#- v.customSoftDelete.SoftDeleteWhere #>}
 func (Table<#- v.structName #>) SoftDeleteSet() Raw   {<#- v.customSoftDelete.SoftDeleteSet #>}
 <#} -#>
-// 给 TableName 加上指针 * 能避免 db.InsertModel(user) 这种错误， 应当使用 db.InsertModel(&user) 或
+// TableName 给 TableName 加上指针 * 能避免 db.InsertModel(user) 这种错误， 应当使用 db.InsertModel(&user) 或
 func (*Table<#- v.structName #>) TableName() string { return "<#= v.tableName#>" }
 type <#= v.structName #> struct {
 <# v.fields.forEach(function (item) { -#>
@@ -40,7 +39,7 @@ type <#= v.structName #> struct {
     sq.DefaultLifeCycle
 }
 <# if (c.hasAutoIncrement()){#>
-// 创建后自增字段赋值处理
+// AfterCreate 创建后自增字段赋值处理
 func (v *<#= v.structName #>) AfterCreate(result sql.Result) error {
     id, err := result.LastInsertId(); if err != nil {
         return err

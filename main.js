@@ -21,6 +21,7 @@ const data = function () {
     return {
         activeTool: qs.parse(location.search).k || "repo",
         repos: [
+            ["boot", "项目脚手架，让开发go服务更容易，开箱即用"],
             ["error", "错误处理指南和错误码"],
             ["validator", "类型安全的结构体数据验证器"],
             ["http", "Go 官方 net/http 标准库和 mux 的扩展, 对错误处理友好"],

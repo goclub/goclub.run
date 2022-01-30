@@ -228,7 +228,11 @@ export default {
         },
         useUserExampleData () {
             const vm = this
-            vm.model = { "packageName": "m", "tableName": "user", "structName": "User", "softDelete": "sq.SoftDeletedAt", "customSoftDelete": { "SoftDeleteWhere": "return sq.Raw{\"`deleted_at` IS NULL\", nil}", "SoftDeleteSet": "return sq.Raw{\"`deleted_at` = ?\" ,[]interface{}{time.Now()}}" }, "fieldCreateUpdate": "sq.CreatedAtUpdatedAt", "fields": [ { "isAutoIncrement": true, "isPrimaryKey": true, "isIDTypeAlias": true, "column": "id", "goType": "uint64", "goTypeCustom": "", "goField": "ID" }, { "isAutoIncrement": false, "isPrimaryKey": false, "isIDTypeAlias": false, "column": "name", "goType": "string", "goTypeCustom": "", "goField": "Name" }, { "isAutoIncrement": false, "isPrimaryKey": false, "isIDTypeAlias": false, "column": "password_sha256", "goType": "string", "goTypeCustom": "", "goField": "PasswordSha256" }, { "isAutoIncrement": false, "isPrimaryKey": false, "isIDTypeAlias": false, "column": "password_salt", "goType": "string", "goTypeCustom": "", "goField": "PasswordSalt" } ] }
+            vm.model = {"packageName":"m","tableName":"user","structName":"User","softDelete":"sq.SoftDeleteTime","customSoftDelete":{"SoftDeleteWhere":"return sq.Raw{\"`deleted_at` IS NULL\", nil}","SoftDeleteSet":"return sq.Raw{\"`deleted_at` = ?\" ,[]interface{}{time.Now()}}"},"fieldCreateUpdate":"sq.CreateTimeUpdateTime","fields":[{"isAutoIncrement":true,"isPrimaryKey":true,"isIDTypeAlias":true,"column":"id","goType":"uint64","goTypeCustom":"","goField":"ID"},{"isAutoIncrement":false,"isPrimaryKey":false,"isIDTypeAlias":false,"column":"mobile","goType":"string","goTypeCustom":"","goField":"Mobile"}]}
+        },
+        blurTableName() {
+            const vm = this
+            vm.model.structName = strToCamel(vm.model.tableName)
         },
         blurModelStructName() {
             const vm = this
@@ -247,6 +251,17 @@ export default {
                 goTypeCustom: "",
                 goField: "",
             })
+        },
+        blurColumnItem(index) {
+            const vm = this
+            let item = vm.model.fields[index]
+            let value = item.column
+            if (value == "id") {
+                value = "ID"
+            }
+            value = value.replace(/_id$/, "ID")
+            value = strToCamel(value)
+            vm.model.fields[index].goField = value
         },
         blurGoFieldsItem(index) {
             const vm = this
@@ -282,7 +297,7 @@ export default {
             }
         }
         return {
-            migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm"),
+            migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm")+"_",
             options: {
                 softDelete: [
                     'custom',
@@ -297,11 +312,23 @@ export default {
                     'float32',
                     'float64',
                     'string',
+                    '[]byte',
+                    'uint',
                     'uint8',
+                    'uint16',
+                    'uint32',
                     'uint64',
                     'int',
+                    'int8',
+                    'int16',
                     'int32',
                     'int64',
+                    'sql.NullString',
+                    'sql.NullInt16',
+                    'sql.NullInt32',
+                    'sql.NullInt64',
+                    'sql.NullBool',
+                    'sql.NullFloat64',
                     'sql.NullTime',
                 ],
                 fieldCreateUpdate: [

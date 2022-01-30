@@ -1,5 +1,11 @@
+import { createVuePlugin } from 'vite-plugin-vue2';
 export default {
-  build: {
+    plugins: [
+        createVuePlugin({
+            target: 'esnext',
+        }),
+    ],
+    build: {
       outDir: "docs",
-  }
+    }
 }

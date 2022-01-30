@@ -14,8 +14,8 @@ export default `
         <el-input style="width:10em;" placeholder="eg:user" v-model="model.packageName"></el-input>
     </el-form-item>
     <el-form-item label="name">
-        struct:<el-input style="width:12em;" placeholder="eg:User" v-model="model.structName"  @blur="blurModelStructName" ></el-input>
-        table:<el-input style="width:12em;" v-model="model.tableName"></el-input>
+        table:<el-input style="width:12em;" @blur="blurTableName"  v-model="model.tableName"></el-input>
+        struct:<el-input style="width:12em;" placeholder="eg:User" v-model="model.structName" ></el-input>
         <!--table struct:<el-input style="width:16em;" v-model="model.tableStructName"></el-input> -->
     </el-form-item>
     <el-form-item label="软删">
@@ -54,9 +54,9 @@ export default `
                     <th>主键</th>
                     <th>自增</th>
                     <th>ID别名</th>
-                    <th>GO字段</th>
+                    <th>column</th>
                     <th>GO类型</th>
-                    <th>table column</th>
+                    <th>GO字段</th>
                     <th>注释</th>
                     <th>操作</th>
                 </tr>
@@ -72,7 +72,7 @@ export default `
                 <el-switch v-if="row.isPrimaryKey" v-model="row.isIDTypeAlias"></el-switch>
                </td>
                <td>
-                    <el-input v-model="row.goField"  @blur="blurGoFieldsItem(index)" > </el-input>
+                    <el-input v-model="row.column"   @blur="blurColumnItem(index)" > </el-input>
                 </td>
                <td>
                    <el-select v-model="row.goType" style="width:10em;" >
@@ -86,7 +86,7 @@ export default `
                     <el-input v-if="row.goType == 'custom'"  style="width:12em;"  placeholder="eg:UserLevel" v-model="row.goTypeCustom" ></el-input>
                </td>
                <td>
-                   <el-input v-model="row.column"  > </el-input>
+                <el-input v-model="row.goField" > </el-input>
                </td>
                <td>
                    <el-input v-model="row.comment"  > </el-input>
