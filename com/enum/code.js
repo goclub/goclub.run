@@ -1,7 +1,7 @@
 export default `package m
 // You can change package name
 
-// <#= v.name #> Generate by https://goclub.run
+// <#= v.name #> Generate by https://goclub.run/?k=enum
 // ---------------------- DO NOT EDIT (Begin) ----------------------
 // Source enums:
 // <#- JSON.stringify(v) #>
