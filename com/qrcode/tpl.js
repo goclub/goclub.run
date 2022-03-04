@@ -38,7 +38,7 @@ export default `
             </td>
             <td>{{item.time}}</td>
             <td>
-                <el-link type="primary" @click="useHistory(item.content)">重新生成</el-link>
+                <el-link type="primary" @click="useHistory(item.content)">生成</el-link>
                 <el-link @click="delHistory(item.content)">删除</el-link>
             </td>
         </tr>
