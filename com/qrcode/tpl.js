@@ -23,8 +23,8 @@ export default `
    </el-col>
    <el-col :span="14" :xs="24" >
 
-     <div>最近生成的二维码</div>
-     <table style="width:100%;">
+     <div><el-switch v-model="showHistory"></el-switch> 二维码生成记录</div>
+     <table style="width:100%;" v-if="showHistory">
         <thead>
             <tr style="text-align:left;" >
             <th>内容</th>
@@ -38,7 +38,7 @@ export default `
             </td>
             <td>{{item.time}}</td>
             <td>
-                <el-link type="primary" @click="useHistory(item.content)">生成</el-link>
+                <el-link type="primary" @click="useHistory(item.content)">重新生成</el-link>
                 <el-link @click="delHistory(item.content)">删除</el-link>
             </td>
         </tr>
