@@ -36,7 +36,7 @@ func Enum<#= v.name #>() (e struct {
 // Match Type safe match of all values, likeness switch
 func (v <#= v.name #>) Match(
 <# v.items.forEach(function (item) { -#>
-  <#= item.field #> func(_ struct{<#= item.field #> bool}) ( errerror)#>,
+  <#= item.field #> func(_ struct{<#= item.field #> bool}) ( err error)#>,
 <# }) -#>
 ) error {
   e := v.Enum()
