@@ -330,6 +330,8 @@ export default {
                     'sql.NullBool',
                     'sql.NullFloat64',
                     'sql.NullTime',
+                    'time.Time',
+                    'xtime.Date',
                 ],
                 fieldCreateUpdate: [
                     'sq.CreatedAtUpdatedAt',
