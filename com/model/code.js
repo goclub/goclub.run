@@ -39,8 +39,8 @@ type <#= v.structName #> struct {
     sq.DefaultLifeCycle
 }
 <# if (c.hasAutoIncrement()){#>
-// AfterCreate 创建后自增字段赋值处理
-func (v *<#= v.structName #>) AfterCreate(result sql.Result) error {
+// AfterInsert 创建后自增字段赋值处理
+func (v *<#= v.structName #>) AfterInsert(result sql.Result) error {
     id, err := result.LastInsertId(); if err != nil {
         return err
     }

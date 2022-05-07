@@ -228,7 +228,7 @@ export default {
         },
         useUserExampleData () {
             const vm = this
-            vm.model = {"packageName":"m","tableName":"user","structName":"User","softDelete":"sq.SoftDeleteTime","customSoftDelete":{"SoftDeleteWhere":"return sq.Raw{\"`deleted_at` IS NULL\", nil}","SoftDeleteSet":"return sq.Raw{\"`deleted_at` = ?\" ,[]interface{}{time.Now()}}"},"fieldCreateUpdate":"sq.CreateTimeUpdateTime","fields":[{"isAutoIncrement":true,"isPrimaryKey":true,"isIDTypeAlias":true,"column":"id","goType":"uint64","goTypeCustom":"","goField":"ID"},{"isAutoIncrement":false,"isPrimaryKey":false,"isIDTypeAlias":false,"column":"mobile","goType":"string","goTypeCustom":"","goField":"Mobile"}]}
+            vm.model = {"packageName":"m","tableName":"user","structName":"User","softDelete":"sq.SoftDeleteTime","customSoftDelete":{"SoftDeleteWhere":"return sq.Raw{\"`delete_time` IS NULL\", nil}","SoftDeleteSet":"return sq.Raw{\"`delete_time` = ?\" ,[]interface{}{time.Now()}}"},"fieldCreateUpdate":"sq.CreateTimeUpdateTime","fields":[{"isAutoIncrement":true,"isPrimaryKey":true,"isIDTypeAlias":true,"column":"id","goType":"uint64","goTypeCustom":"","goField":"ID"},{"isAutoIncrement":false,"isPrimaryKey":false,"isIDTypeAlias":false,"column":"mobile","goType":"string","goTypeCustom":"","goField":"Mobile"}]}
         },
         blurTableName() {
             const vm = this
@@ -323,6 +323,8 @@ export default {
                     'int16',
                     'int32',
                     'int64',
+                    'time.Time',
+                    'xtime.Date',
                     'sql.NullString',
                     'sql.NullInt16',
                     'sql.NullInt32',
@@ -330,12 +332,11 @@ export default {
                     'sql.NullBool',
                     'sql.NullFloat64',
                     'sql.NullTime',
-                    'time.Time',
-                    'xtime.Date',
+                    'xtime.NullDate',
                 ],
                 fieldCreateUpdate: [
-                    'sq.CreatedAtUpdatedAt',
                     'sq.CreateTimeUpdateTime',
+                    'sq.CreatedAtUpdatedAt',
                     'sq.GMTCreateGMTUpdate',
                     '无',
                 ]
