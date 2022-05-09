@@ -2,6 +2,7 @@ import tpl from "./tpl.js"
 import code from "./code.js"
 import * as ejs from "ejs"
 import copy from "copy-to-clipboard"
+import { snakeCase } from "snake-case"
 function toTitle (s){
     if (s == ""){ return "" }
     if (s == `[]byte`) {
@@ -37,6 +38,10 @@ export default {
     components,
     template: tpl,
     computed:{
+        enumsFileName() {
+            const vm = this
+            return 'enum_' + snakeCase(vm.enums.name) + '.go'
+        },
         enumsResult () {
             const vm = this
             const v = vm.enums
@@ -60,6 +65,14 @@ export default {
         }
     },
     methods: {
+        copyFilename() {
+            const vm = this
+            copy(vm.enumsFileName)
+            vm.$message({
+                message: '文件名已复制到粘贴板',
+                type: "success",
+            });
+        },
         copyCode() {
             const vm = this
             copy(vm.enumsResult)
