@@ -100,6 +100,7 @@ export default `
         <el-button @click="addNewField" type="primary" icon="el-icon-plus">添加字段</el-button>
     </el-form-item>
 </el-form>
+<el-button @click="copyFilename" >复制文件名:{{fileName}}</el-button>
 <el-button @click="copyCode" >复制代码</el-button>
 <pre style="margin-top:0;margin-right:0.5em;" class="language-go" v-html="modelResultCode" ></pre>
 <el-button @click="copyCode" >复制代码</el-button>

@@ -54,6 +54,10 @@ export default {
     components,
     template: tpl,
     computed:{
+        fileName() {
+            const vm = this
+            return 'sql_' + snakeCase(vm.model.tableName) + '.go'
+        },
         modelResult() {
             const vm = this
             const v = vm.model
@@ -217,6 +221,14 @@ export default {
             vm.model.fields = vm.model.fields.filter(function (item, index) {
                 return index != removeIndex
             })
+        },
+        copyFilename() {
+            const vm = this
+            copy(vm.fileName)
+            vm.$message({
+                message: '文件名已复制到粘贴板',
+                type: "success",
+            });
         },
         copyCode() {
             const vm = this
