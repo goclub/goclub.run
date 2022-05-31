@@ -75,7 +75,7 @@ export default `
                     <el-input v-model="row.column"   @blur="blurColumnItem(index)" > </el-input>
                 </td>
                <td>
-                   <el-select v-model="row.goType" style="width:10em;" >
+                   <el-select v-model="row.goType" filterable style="width:10em;" >
                        <el-option
                            v-for="item in options.fieldType"
                            :key="item"
