@@ -3,6 +3,9 @@ export default `package m
 
 // <#= v.name #> Generate by https://goclub.run/?k=enum
 // ---------------------- DO NOT EDIT (Begin) ----------------------
+import (
+	xerr "github.com/goclub/error"
+)
 // Source enums:
 // <#- JSON.stringify(v) #>
 type <#= v.name #> <#= v.type #>
@@ -42,7 +45,7 @@ func (v <#= v.name #>) Match(
   e := v.Enum()
   switch v {
   default:
-    return fmt.Errorf("<#= v.name #> can not be %s", v)
+    return xerr.Errorf("<#= v.name #> can not be %s", v)
 <# v.items.forEach(function (item) { -#>
   case e.<#= item.field #>:
     return <#= item.field #>(struct{ <#= item.field #> bool } {})

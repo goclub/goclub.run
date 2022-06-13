@@ -20,8 +20,8 @@ export default `<div>
         <el-tag  size="mini" type="info">尽量不要编辑已存在的 value</el-tag>
         <div v-for="(v, i) in enums.items" style="margin-bottom:0.5em;">
             <span style="display:inline-block;min-width:3em;"></span>
-            <el-input placeholdeSourcer="field" size="mini" style="width:10em;" v-model="v.field" @blur="amendEnumsItemsField(i)" ></el-input>
-            <el-input placeholder="value"  size="mini" style="width:10em;" @blur="amendEnumsItemsValue(i)" v-model="v.value" ></el-input>
+            <el-input placeholdeSourcer="field" size="mini" style="width:20em;" v-model="v.field" @blur="amendEnumsItemsField(i)" ></el-input>
+            <el-input placeholder="value"  size="mini" style="width:20em;" @blur="amendEnumsItemsValue(i)" v-model="v.value" ></el-input>
             <el-button  @click="removeEnumsItem(i)" size="mini" type="danger" icon="el-icon-remove"></el-button>
         </div>
         <span style="display:inline-block;min-width:3em;"></span>
