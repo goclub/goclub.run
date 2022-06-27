@@ -101,7 +101,7 @@ export default {
                 if (tagItems.length == 0) {
                     return ''
                 }
-                return ` sql:"${tagItems.join('|')}"`
+                return ` sq:"${tagItems.join('|')}"`
             }
             function hasPrimaryKey() {
                 return v.fields.some(function(item) {
