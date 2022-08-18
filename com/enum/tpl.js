@@ -1,4 +1,5 @@
 export default `<div>
+<p>加强enum,更安全的使用枚举类型</p>
 <el-form label-width="8em" size="mini" >
     <el-form-item label="示例配置">
         <el-button size="mini" @click="exampleMarkEnumsBySource" type="primary" >LogKind</el-button>       

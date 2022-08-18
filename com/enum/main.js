@@ -43,16 +43,22 @@ export default {
             return 'enum_' + snakeCase(vm.enums.name) + '.go'
         },
         enumsResult () {
-            const vm = this
+                const vm = this
             const v = vm.enums
             let maxItemFieldLen = 0
-            v.items.forEach(function (item) {
+            v.items.forEach(function (item, index) {
                 if (maxItemFieldLen < item.field.length) {
                     maxItemFieldLen = item.field.length
                 }
             })
+            v.items = v.items.map(function (item, index) {
+                if(index != v.items.length-1) {
+                    item.tailed = ", "
+                }
+                return item
+            })
             return ejs.render(code, {
-                v: vm.enums,
+                v: v,
                 maxItemFieldLen: maxItemFieldLen,
                 govalue,
                 strToCamel,

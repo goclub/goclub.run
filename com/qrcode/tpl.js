@@ -17,7 +17,7 @@ export default `
            <qrcode-vue :value="result" :size="form.size" ></qrcode-vue>
        </div>
        <div style="padding-top: 1em;">
-       尺寸: <el-input-number :step="20"  v-model="form.size"  :min="50" :max="330" ></el-input-number>
+       尺寸: <el-input-number :step="20"  v-model="form.size"  :min="50" :max="1000" ></el-input-number>
        </div>
      </div>
    </el-col>
