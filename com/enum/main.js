@@ -12,6 +12,9 @@ function toTitle (s){
 }
 function firstLetterToLowerCase(s) {
     if (s == ""){ return "" }
+    if (/^[A-Z]+$/.test(s)) {
+        return s.toLowerCase()
+    }
     return s.replace(s[0],s[0].toLowerCase())
 }
 function strToCamel(str){
