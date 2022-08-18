@@ -61,6 +61,7 @@ export default {
                 return item
             })
             return ejs.render(code, {
+                backqueto: "`",
                 v: v,
                 maxItemFieldLen: maxItemFieldLen,
                 govalue,

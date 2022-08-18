@@ -40,17 +40,18 @@ func Enum<#= v.name #>Switch() (
     e := Enum<#= v.name #>()
     return <# v.items.forEach(function (item) { #>e.<#= item.field #><#=item.tailed#><# }) #>
 } 
-func exampleEnum<#= v.name #>Switch (v <#= v.name #>) (err error) {
-    switch <# v.items.forEach(function (item) { -#><#= firstLetterToLowerCase(item.field) #><#= item.tailed #><# }) -#> := Enum<#= v.name #>Switch(); v {
-    <# v.items.forEach(function (item) { -#>
-    case <#= firstLetterToLowerCase(item.field) #>:
-        // @TODO write some code
-    <# }) -#>
-    default:
-        err = xerr.New(fmt.Sprintf("LogKind can not be %s", v))
-        return
-    }
+func exampleEnum<#= v.name #>Switch (v <#= v.name #>) {
+    _ = <#= backqueto #>
+switch <# v.items.forEach(function (item) { -#><#= firstLetterToLowerCase(item.field) #><#= item.tailed #><# }) -#> := m.Enum<#= v.name #>Switch(); v {
+<# v.items.forEach(function (item) { -#>
+case <#= firstLetterToLowerCase(item.field) #>:
+    // @TODO write some code
+<# }) -#>
+default:
+    err = xerr.New(fmt.Sprintf("LogKind can not be %s", v))
     return
+}
+<#= backqueto #>
 }
 // Match Type safe match of all values, likeness switch
 func (v <#= v.name #>) Match(
