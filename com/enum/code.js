@@ -39,7 +39,7 @@ func Enum<#= v.name #>Switch() (
 ) {
     e := Enum<#= v.name #>()
     return <# v.items.forEach(function (item) { #>e.<#= item.field #><#=item.tailed#><# }) #>
-} 
+}
 func exampleEnum<#= v.name #>Switch (v <#= v.name #>) {
     _ = <#= backqueto #>
 switch <# v.items.forEach(function (item) { -#><#= firstLetterToLowerCase(item.field) #><#= item.tailed #><# }) -#> := m.Enum<#= v.name #>Switch(); v {
@@ -48,7 +48,7 @@ case <#= firstLetterToLowerCase(item.field) #>:
     // @TODO write some code
 <# }) -#>
 default:
-    err = xerr.New(fmt.Sprintf("LogKind can not be %s", v))
+    err = xerr.New(fmt.Sprintf("<#= v.name #> can not be %s", v))
     return
 }
 <#= backqueto #>
