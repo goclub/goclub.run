@@ -31,15 +31,6 @@ func Enum<#= v.name #>() (e struct {
 <# }) -#>
   return
 }
-// Enum<#= v.name #> safe switch of all values
-func Enum<#= v.name #>Switch() (
-<# v.items.forEach(function (item) { -#>
-    <#= firstLetterToLowerCase(item.field) #> <#= v.name #>,
-<# }) -#>
-) {
-    e := Enum<#= v.name #>()
-    return <# v.items.forEach(function (item) { #>e.<#= item.field #><#=item.tailed#><# }) #>
-}
 func exampleEnum<#= v.name #>Switch (v <#= v.name #>) {
     _ = <#= backqueto #>
 switch <# v.items.forEach(function (item) { -#><#= firstLetterToLowerCase(item.field) #><#= item.tailed #><# }) -#> := m.Enum<#= v.name #>Switch(); v {
@@ -53,28 +44,30 @@ default:
 }
 <#= backqueto #>
 }
-// Match Type safe match of all values, likeness switch
-func (v <#= v.name #>) Match(
+// ↑↑↑↑ Enum<#= v.name #>Switch example code ↑↑↑↑
+// Enum<#= v.name #>Switch safe switch of all values
+func Enum<#= v.name #>Switch() (
 <# v.items.forEach(function (item) { -#>
-  <#= item.field #> func(_ struct{<#= item.field #> bool}) ( err error)#>,
+    <#= firstLetterToLowerCase(item.field) #> <#= v.name #>,
 <# }) -#>
-) error {
-  e := Enum<#= v.name #>()
-  switch v {
-  default:
-    return xerr.New(fmt.Sprintf("<#= v.name #> can not be %s", v))
-<# v.items.forEach(function (item) { -#>
-  case e.<#= item.field #>:
-    return <#= item.field #>(struct{ <#= item.field #> bool } {})
-<# }) -#>
-  }
+) {
+    e := Enum<#= v.name #>()
+    return <# v.items.forEach(function (item) { #>e.<#= item.field #><#=item.tailed#><# }) #>
 }
 // Validator Verify data
-func (v <#= v.name #>) Validator() error {
-    return v.Match(
-  <# v.items.forEach(function (item) { -#>
-    func(_ struct{<#= item.field #> bool}) error {return nil} -#>,
-  <# }) -#>)
+func (v <#= v.name #>) Validator(custom ...error) error {
+    outError := xerr.New(fmt.Sprintf("<#= v.name #> can not be %s", v))
+    if len(custom) != 0 {
+		outError = custom[0]
+	}
+    switch <# v.items.forEach(function (item) { -#><#= firstLetterToLowerCase(item.field) #><#= item.tailed #><# }) -#> := Enum<#= v.name #>Switch(); v {
+    <# v.items.forEach(function (item) { -#>
+    case <#= firstLetterToLowerCase(item.field) #>:
+    <# }) -#>
+    default:
+        return outError
+    }
+    return nil
 }
 // ---------------------- DO NOT EDIT (End) ----------------------
 `
