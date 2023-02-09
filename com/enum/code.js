@@ -31,38 +31,41 @@ func Enum<#= v.name #>() (e struct {
 <# }) -#>
   return
 }
-func exampleEnum<#= v.name #>Switch (v <#= v.name #>) {
+func Enum<#= v.name #>ExampleSwitch () {
     _ = <#= backqueto #>
 switch <# v.items.forEach(function (item) { -#><#= firstLetterToLowerCase(item.field) #><#= item.tailed #><# }) -#> := m.Enum<#= v.name #>Switch(); v {
 <# v.items.forEach(function (item) { -#>
-case <#= firstLetterToLowerCase(item.field) #>:
+case <#= firstLetterToLowerCase(item.field) #>.<#= item.field #>:
     // @TODO write some code
 <# }) -#>
 default:
-    err = xerr.New(fmt.Sprintf("<#= v.name #> can not be %s", v))
+    err = xerr.New(fmt.Sprintf("<#= v.name #> can not be %v", v))
     return
 }
 <#= backqueto #>
 }
-// ↑↑↑↑ Enum<#= v.name #>Switch example code ↑↑↑↑
 // Enum<#= v.name #>Switch safe switch of all values
+// example: m.Enum<#= v.name #>ExampleSwitch()
 func Enum<#= v.name #>Switch() (
 <# v.items.forEach(function (item) { -#>
-    <#= firstLetterToLowerCase(item.field) #> <#= v.name #>,
+    <#= firstLetterToLowerCase(item.field) #> struct {<#= item.field.padEnd(maxItemFieldLen) #> <#= v.name #>},
 <# }) -#>
 ) {
     e := Enum<#= v.name #>()
-    return <# v.items.forEach(function (item) { #>e.<#= item.field #><#=item.tailed#><# }) #>
+    <# v.items.forEach(function (item) { -#>
+<#= firstLetterToLowerCase(item.field) #>.<#= item.field #> = e.<#= item.field #>
+    <# }) -#>
+return
 }
 // Validator Verify data
 func (v <#= v.name #>) Validator(custom ...error) error {
-    outError := xerr.New(fmt.Sprintf("<#= v.name #> can not be %s", v))
+    outError := xerr.New(fmt.Sprintf("<#= v.name #> can not be %v", v))
     if len(custom) != 0 {
 		outError = custom[0]
 	}
     switch <# v.items.forEach(function (item) { -#><#= firstLetterToLowerCase(item.field) #><#= item.tailed #><# }) -#> := Enum<#= v.name #>Switch(); v {
     <# v.items.forEach(function (item) { -#>
-    case <#= firstLetterToLowerCase(item.field) #>:
+    case <#= firstLetterToLowerCase(item.field) #>.<#= item.field#>:
     <# }) -#>
     default:
         return outError
