@@ -50,7 +50,7 @@ func (v *<#= v.structName #>) AfterInsert(result sq.Result) error {
     return nil
 }
 <# } #>
-func (v *Table<#= v.structName #>) Column() (col struct{
+func (v Table<#= v.structName #>) Column() (col struct{
 <# v.fields.forEach(function (item) { -#>
     <#= h.padGolFieldValue(item.goField)#> sq.Column
 <#})-#>
