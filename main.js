@@ -51,6 +51,16 @@ const data = function () {
     }
 }
 const methods = {
+    link: function (item) {
+        if (item[3]) {
+            return item[3]
+        }
+        if (item[2]) {
+            return 'https://goclub.run/' + item[0]
+        } else {
+            return 'https://github.com/goclub/' + item[0]
+        }
+    },
     changeTag: function (value, e) {
         const vm = this
         history.pushState({}, "", `${location.pathname}?k=${vm.activeTool}`);

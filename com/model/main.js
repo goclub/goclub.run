@@ -139,10 +139,9 @@ export default {
                             }
                         })
                         let code = "id"
-                        if (target.goType != "uint64") {
+                        if (target.goType != "uint64" && setType) {
                             code = `${setType}(${code})`
                         }
-
                         if (target.isIDTypeAlias) {
                             code = `ID${vm.model.structName}(${code})`
                         }
