@@ -72,5 +72,17 @@ func (v <#= v.name #>) Validator(custom ...error) error {
     }
     return nil
 }
+// JavaScript code for https://github.com/2type/admin#_enum
+/*
+TA.enum.<#= firstLetterToLowerCase(v.name) #> = [
+<# v.items.forEach(function (item) { -#>
+    {
+        key: "<#= item.field #>",
+        value: <#- jsCodeValue(v, item) #>,
+        label: "<#= item.label #>",
+    },
+<# }) -#>
+]
+*/
 // ---------------------- DO NOT EDIT (End) ----------------------
 `

@@ -33,6 +33,12 @@ function govalue(type, value) {
             return value
     }
 }
+function jsCodeValue(v, item) {
+    if (v.type != 'uint8') {
+        return `"${item.value}"`
+    }
+    return item.value
+}
 const components = {
 
 }
@@ -68,6 +74,7 @@ export default {
                 strToCamel,
                 firstLetterToLowerCase,
                 toTitle,
+                jsCodeValue,
             }, {delimiter: "#"})
         },
         enumsResultCode () {
@@ -93,7 +100,7 @@ export default {
         },
         exampleMarkEnumsBySource() {
             const vm = this
-            vm.source.enums = `{"name":"LogKind","type":"uint8","items":[{"field":"Info","value":"1"},{"field":"Danger","value":"2"}]}`
+            vm.source.enums = `{"name":"LogKind","type":"uint8","items":[{"field":"Info","value":"1","tailed":", ","label":"信息"},{"field":"Danger","value":"2","label":"危险"}]}`
             vm.markEnumsBySource()
         },
         markEnumsBySource() {
