@@ -1,4 +1,29 @@
 export default `// Package m Generate by https://goclub.run/?k=model
+
+// ds.go
+type CreateRequest struct {
+<# c.createFields().forEach(function (item) { -#>
+    <#= h.padGoField(item) #><#= h.padGoType(item) #>
+<# }) -#>
+}
+func (dep DS) Create(ctx context.Context, req CreateRequest) (<#= h.firstlow(v.structName) #>ID m.ID<#= v.structName #>, err error){
+    <#- h.firstlow(v.structName) #> := &m.<#- v.structName #>{
+<# c.createFields().forEach(function (item) { -#>
+        <#= h.padGoField(item) #>: req.<#= item.goField -#>, 
+<# }) -#>
+    }
+    if _, err = dep.mysql.Main.InsertModel(ctx, &<#- h.firstlow(v.structName) #>, sq.QB{}); err != nil {
+        return
+    }
+<# v.fields.forEach(function (item) { -#>
+<# if(item.isPrimaryKey) {-#>
+    <#= h.firstlow(v.structName) #>ID = <#- h.firstlow(v.structName) #>.<#- item.goField #>
+<# } -#>
+<# }) -#>
+    return
+}
+
+
 package <#- v.packageName #>
 import (
     "database/sql"
@@ -30,7 +55,7 @@ func (Table<#- v.structName #>) SoftDeleteSet() Raw   {<#- v.customSoftDelete.So
 func (*Table<#- v.structName #>) TableName() string { return "<#= v.tableName#>" }
 type <#= v.structName #> struct {
 <# v.fields.forEach(function (item) { -#>
-<# if (item.comment) { #>    // <#= item.comment #>
+<# if (item.comment) { #>   <#= item.comment #>
 <# } -#>
     <#= h.padGoField(item) #><#= h.padGoType(item) #> \`db:"<#= item.column #>"<#- h.sqTag(item)#>\`
 <# }) -#>

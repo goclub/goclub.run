@@ -2,24 +2,32 @@ import tpl from "./tpl.js"
 import code from "./code.js"
 import * as ejs from "ejs"
 import copy from "copy-to-clipboard"
-import { snakeCase } from "snake-case"
-function toTitle (s){
-    if (s == ""){ return "" }
+import {snakeCase} from "snake-case"
+
+function toTitle(s) {
+    if (s == "") {
+        return ""
+    }
     if (s == `[]byte`) {
         return 'Bytes'
     }
-    return s.replace(s[0],s[0].toUpperCase())
+    return s.replace(s[0], s[0].toUpperCase())
 }
+
 function firstLetterToLowerCase(s) {
-    if (s == ""){ return "" }
+    if (s == "") {
+        return ""
+    }
     if (/^[A-Z]+$/.test(s)) {
         return s.toLowerCase()
     }
-    return s.replace(s[0],s[0].toLowerCase())
+    return s.replace(s[0], s[0].toLowerCase())
 }
-function strToCamel(str){
-    return str.replace(/(^|_)(\w)/g,(m,$1,$2)=>$2.toUpperCase());
+
+function strToCamel(str) {
+    return str.replace(/(^|_)(\w)/g, (m, $1, $2) => $2.toUpperCase());
 }
+
 function govalue(type, value) {
     value = String(value)
     switch (type) {
@@ -33,26 +41,26 @@ function govalue(type, value) {
             return value
     }
 }
+
 function jsCodeValue(v, item) {
     if (v.type != 'uint8') {
         return `"${item.value}"`
     }
     return item.value
 }
-const components = {
 
-}
+const components = {}
 export default {
     name: 'spec-enum',
     components,
     template: tpl,
-    computed:{
+    computed: {
         enumsFileName() {
             const vm = this
             return 'enum_' + snakeCase(vm.enums.name) + '.go'
         },
-        enumsResult () {
-                const vm = this
+        enumsResult() {
+            const vm = this
             const v = vm.enums
             let maxItemFieldLen = 0
             v.items.forEach(function (item, index) {
@@ -61,7 +69,7 @@ export default {
                 }
             })
             v.items = v.items.map(function (item, index) {
-                if(index != v.items.length-1) {
+                if (index != v.items.length - 1) {
                     item.tailed = ", "
                 }
                 return item
@@ -77,8 +85,9 @@ export default {
                 jsCodeValue,
             }, {delimiter: "#"})
         },
-        enumsResultCode () {
-            return Prism.highlight(this.enumsResult, Prism.languages.go, "go")
+        enumsResultCode() {
+            return this.enumsResult
+            // return Prism.highlight(this.enumsResult, Prism.languages.go, "go")
         }
     },
     methods: {
@@ -134,7 +143,7 @@ export default {
                                 maxNumber = value
                             }
                         })
-                        newItem.value = parseInt(maxNumber)+1
+                        newItem.value = parseInt(maxNumber) + 1
                     }
                     break
             }
@@ -152,7 +161,7 @@ export default {
             if (v == "") {
                 return
             }
-            vm.enums.name = v.replace(v[0],v[0].toUpperCase());
+            vm.enums.name = v.replace(v[0], v[0].toUpperCase());
         },
         amendEnumsItemsValue(index) {
             const vm = this
@@ -170,7 +179,7 @@ export default {
                     return
                 }
                 if (item.value == value) {
-                    alert(item.field + ":" + item.value  + " 重复")
+                    alert(item.field + ":" + item.value + " 重复")
                 }
             })
         },
@@ -180,13 +189,13 @@ export default {
             if (field == "") {
                 return
             }
-            field = field.replace(field[0],field[0].toUpperCase());
+            field = field.replace(field[0], field[0].toUpperCase());
             vm.enums.items[index].field = field
             switch (vm.enums.type) {
                 case "string":
                 case "[]byte":
                     if (vm.enums.items[index].value == "") {
-                        vm.enums.items[index].value = field.replace(field[0],field[0].toLowerCase());
+                        vm.enums.items[index].value = field.replace(field[0], field[0].toLowerCase());
                         vm.amendEnumsItemsValue(index)
                     }
                     break
@@ -214,9 +223,7 @@ export default {
             enums: {
                 name: "",
                 type: "uint8",
-                items: [
-
-                ],
+                items: [],
             },
             model: {
                 tableName: "",

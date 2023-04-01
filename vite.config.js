@@ -1,4 +1,5 @@
-import { createVuePlugin } from 'vite-plugin-vue2';
+import {createVuePlugin} from 'vite-plugin-vue2';
+
 export default {
     plugins: [
         createVuePlugin({
@@ -6,6 +7,6 @@ export default {
         }),
     ],
     build: {
-      outDir: "docs",
+        outDir: "docs",
     }
 }
