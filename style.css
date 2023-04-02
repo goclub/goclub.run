@@ -12,7 +12,7 @@
 
 body {
     padding: 2em;
-    background: url(https://picsum.photos/seed/some/3840/2160?blur=2) no-repeat;
+    background: url(https://picsum.photos/seed/some/3840/2160?blur=2) repeat-y;
 }
 
 .icp-link {

@@ -10,8 +10,11 @@
                 <el-button @click="copyMigrateName">{{ migrateName }}</el-button>
             </el-form-item>
             <el-form-item label="示例配置">
-                <el-button size="mini" type="primary" @click="useUserExampleData"
-                >user
+                <el-button size="mini" type="primary" @click="useAccountExampleData"
+                >account
+                </el-button>
+                <el-button size="mini" type="primary" @click="usePlatformExampleData"
+                >platform
                 </el-button>
             </el-form-item>
             <el-form-item label="package">
@@ -118,7 +121,8 @@
                             ></el-input>
                         </td>
                         <td>
-                            <el-select v-model="row.goType" filterable style="width: 10em">
+                            <el-select v-model="row.goType" filterable style="width: 10em"
+                                       @change="changeGoType(index)">
                                 <el-option
                                         v-for="item in options.fieldType"
                                         :key="item"
@@ -129,7 +133,7 @@
                             <el-input
                                     v-if="row.goType == 'custom'"
                                     style="width: 12em"
-                                    placeholder="eg:UserLevel"
+                                    placeholder="eg:PlatformKind"
                                     v-model="row.goTypeCustom"
                             ></el-input>
                         </td>
@@ -152,8 +156,10 @@
                                     icon="el-icon-remove"
                             ></el-button>
 
-                            <el-button icon="el-icon-arrow-up" size="mini"></el-button>
-                            <el-button icon="el-icon-arrow-down" size="mini"></el-button>
+                            <el-button icon="el-icon-arrow-up" size="mini"
+                                       @click="swapIndex($event, index, 'up')"></el-button>
+                            <el-button icon="el-icon-arrow-down" size="mini"
+                                       @click="swapIndex($event, index, 'down')"></el-button>
                         </td>
                     </tr>
                 </table>
@@ -163,12 +169,14 @@
                 </el-button>
             </el-form-item>
         </el-form>
-
-        <div v-for="type in codeType" :key="type">
-            <el-button @click="copyFilename(type)">复制 {{ fileName(type) }}</el-button>
-            <el-button @click="copyCode(type)">复制代码</el-button>
-            <pre class="language-go" v-html="modelResultCode(type)"></pre>
-        </div>
+        <el-tabs v-model="codeTypeTab">
+            <el-tab-pane v-for="type in codeType" :key="type"
+                         :label="fileName(type)" :name="type">
+                <el-button @click="copyFilename(type)" type="primary">复制文件名</el-button>
+                <el-button @click="copyCode(type)" type="primary">复制代码</el-button>
+                <pre class="language-go" v-html="modelResultCode(type)"></pre>
+            </el-tab-pane>
+        </el-tabs>
     </div>
 </template>
 <script>
@@ -180,8 +188,10 @@ import {snakeCase} from "snake-case";
 import copy from "copy-to-clipboard";
 import dayjs from "dayjs";
 import hljs from "highlight.js";
-// 引入 hljs 样式
-import "highlight.js/styles/github.css";
+// 引入 hljs solarized-light 样式
+// 引入 hljs lib lang golang
+import "highlight.js/lib/languages/go.js";
+import "highlight.js/styles/base16/solarized-light.css";
 
 const components = {};
 import h from "./helper.js";
@@ -214,6 +224,38 @@ export default {
         }, 0);
     },
     methods: {
+        // 基于index 和 kind(up down) 调整 vm.model[index]的位置
+        swapIndex(event, index, kind) {
+            const vm = this;
+            const fields = vm.model.fields;
+            const length = fields.length;
+            if (index === 0 && kind === 'up') {
+                return;
+            }
+            if (index === length - 1 && kind === 'down') {
+                return;
+            }
+            let newIndex = 0;
+            if (kind === 'up') {
+                newIndex = index - 1;
+            }
+            if (kind === 'down') {
+                newIndex = index + 1;
+            }
+            const temp = fields[index];
+            fields[index] = fields[newIndex];
+            fields[newIndex] = temp;
+            vm.model.fields = fields
+            vm.$forceUpdate()
+            switch (kind) {
+                case 'up':
+                    window.scrollBy(0, -(event.target.offsetHeight + 5));
+                    break;
+                case 'down':
+                    window.scrollBy(0, (event.target.offsetHeight + 5));
+                    break;
+            }
+        },
         modelResult(type) {
             var tpl = "";
             switch (type) {
@@ -336,7 +378,7 @@ export default {
                         padGoType: function (item) {
                             let type = item.goType;
                             if (type === "custom") {
-                                type = item.goTypeCustom;
+                                type = item.goTypeCustom || '';
                             }
                             if (v.isIDTypeAlias && item.isPrimaryKey) {
                                 type = "ID" + vm.model.structName;
@@ -426,35 +468,116 @@ export default {
                 type: "success",
             });
         },
-        useUserExampleData() {
+        useAccountExampleData() {
             const vm = this;
             vm.model = {
-                packageName: "m",
-                tableName: "user",
-                structName: "User",
-                softDelete: "sq.SoftDeleteTime",
-                isAutoIncrement: true,
-                isIDTypeAlias: true,
-                customSoftDelete: {
-                    SoftDeleteWhere: 'return sq.Raw{"`delete_time` IS NULL", nil}',
-                    SoftDeleteSet:
-                        'return sq.Raw{"`delete_time` = ?" ,[]interface{}{time.Now()}}',
+                "packageName": "m",
+                "tableName": "account",
+                "structName": "Account",
+                "interfaceName": "Account",
+                "softDelete": "sq.WithoutSoftDelete",
+                "isAutoIncrement": true,
+                "isIDTypeAlias": true,
+                "customSoftDelete": {
+                    "SoftDeleteWhere": "return sq.Raw{\"`delete_time` IS NULL\", nil}",
+                    "SoftDeleteSet": "return sq.Raw{\"`delete_time` = ?\" ,[]interface{}{time.Now()}}"
                 },
-                fieldCreateUpdate: "sq.CreateTimeUpdateTime",
-                fields: [
+                "fieldCreateUpdate": "无",
+                "fields": [
                     {
-                        isPrimaryKey: true,
-                        column: "id",
-                        goType: "uint64",
-                        goField: "ID",
+                        "isPrimaryKey": true,
+                        "column": "id",
+                        "goType": "string",
+                        "goField": "ID",
+                        "isCreate": false,
+                        "isUpdate": false
                     },
                     {
-                        column: "mobile",
-                        goType: "string",
-                        goField: "Mobile",
+                        "isPrimaryKey": false,
+                        "column": "platform_kind",
+                        "goType": "custom",
+                        "goField": "PlatformKind",
+                        "goTypeCustom": "PlatformKind",
+                        "isCreate": true,
+                        "isUpdate": false
                     },
-                ],
-            };
+                    {
+                        "isPrimaryKey": false,
+                        "column": "unionid",
+                        "goType": "string",
+                        "goField": "Unionid",
+                        "isCreate": true,
+                        "isUpdate": false
+                    },
+                    {
+                        "isPrimaryKey": false,
+                        "column": "create_time",
+                        "goType": "time.Time",
+                        "goField": "CreateTime",
+                        "isCreate": false,
+                        "isUpdate": false
+                    }
+                ]
+            }
+        },
+        usePlatformExampleData() {
+            const vm = this;
+            vm.model = {
+                "packageName": "m",
+                "tableName": "platform",
+                "structName": "Platform",
+                "interfaceName": "Account",
+                "softDelete": "sq.WithoutSoftDelete",
+                "isAutoIncrement": false,
+                "isIDTypeAlias": true,
+                "customSoftDelete": {
+                    "SoftDeleteWhere": "return sq.Raw{\"`delete_time` IS NULL\", nil}",
+                    "SoftDeleteSet": "return sq.Raw{\"`delete_time` = ?\" ,[]interface{}{time.Now()}}"
+                },
+                "fieldCreateUpdate": "sq.CreateTimeUpdateTime",
+                "fields": [
+                    {
+                        "isPrimaryKey": true,
+                        "column": "id",
+                        "goType": "string",
+                        "goField": "ID",
+                        "isCreate": true,
+                        "isUpdate": false
+                    },
+                    {
+                        "isPrimaryKey": false,
+                        "column": "title",
+                        "goType": "string",
+                        "goField": "Title",
+                        "goTypeCustom": "",
+                        "isCreate": true,
+                        "isUpdate": true
+                    },
+                    {
+                        "isPrimaryKey": false,
+                        "column": "appid",
+                        "goType": "string",
+                        "goField": "AppID",
+                        "isCreate": true,
+                    },
+                    {
+                        "isPrimaryKey": false,
+                        "column": "app_secret",
+                        "goType": "string",
+                        "goField": "AppSecret",
+                        "isCreate": true,
+                        "isUpdate": true,
+                    },
+                    {
+                        "isPrimaryKey": false,
+                        "column": "kind",
+                        "goType": "custom",
+                        "goField": "Kind",
+                        "goTypeCustom": "PlatformKind",
+                        "isCreate": true,
+                    }
+                ]
+            }
         },
         blurTableName() {
             const vm = this;
@@ -469,6 +592,15 @@ export default {
                 goField: "",
             });
         },
+        changeGoType(index) {
+            const vm = this;
+            let item = vm.model.fields[index];
+            if (item.goType == "custom") {
+                if (item.goTypeCustom == "") {
+                    item.goTypeCustom = vm.model.structName + item.goField
+                }
+            }
+        },
         blurColumnItem(index) {
             const vm = this;
             let item = vm.model.fields[index];
@@ -477,7 +609,7 @@ export default {
                 value = "ID";
             }
             value = value.replace(/_id$/, "ID");
-            value = strToCamel(value);
+            value = h.toCamel(value);
             vm.model.fields[index].goField = value;
         },
         blurGoFieldsItem(index) {
@@ -514,24 +646,24 @@ export default {
                     "sq.WithoutSoftDelete",
                 ],
                 fieldType: [
+                    "string",
+                    "uint64",
+                    "time.Time",
+                    "xtime.Date",
                     "custom",
                     "bool",
                     "float32",
                     "float64",
-                    "string",
                     "[]byte",
                     "uint",
                     "uint8",
                     "uint16",
                     "uint32",
-                    "uint64",
                     "int",
                     "int8",
                     "int16",
                     "int32",
                     "int64",
-                    "time.Time",
-                    "xtime.Date",
                     "sql.NullString",
                     "sql.NullInt16",
                     "sql.NullInt32",
@@ -556,6 +688,7 @@ export default {
             },
             model: model,
             codeType: ['model', 'ids', 'ds'],
+            codeTypeTab: 'model',
         };
     },
 };
@@ -563,9 +696,10 @@ export default {
 <style>
 .language-go {
     padding: 1em;
-    margin-top: 0;
     margin-right: 0.5em;
-    height: 20em;
     overflow: auto;
+    background: #fdf6e3;
+    border-radius: 0.3em;
+
 }
 </style>

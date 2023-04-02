@@ -3,6 +3,7 @@ type DS interface {
     <#- c.subModelName()#>Create(ctx context.Context, req I<#- v.interfaceName #>.<#- c.subModelName()#>CreateRequest) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
     <#- c.subModelName()#>Update(ctx context.Context, req I<#- v.interfaceName #>.<#- c.subModelName()#>UpdateRequest) (err error)
     List(ctx context.Context) (list []m.structName, err error)
+    Must<#- c.subModelName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>ID m.ID<#= v.structName #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
 } 
 type <#- c.subModelName()#>CreateRequest struct {
 <# c.createFields().forEach(function (item) { -#>

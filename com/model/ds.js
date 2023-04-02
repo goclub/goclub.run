@@ -17,7 +17,7 @@ func (dep DS) <#- c.subModelName()#>Create(ctx context.Context, req I<#- v.inter
 func (dep DS) <#- c.subModelName()#>Update(ctx context.Context, req I<#- v.interfaceName #>.<#- c.subModelName()#>UpdateRequest) (err error){
     col := m.Table<#- v.structName#>{}.Column()
     var updateData = map[sq.Column]interface{}{
-<# c.createFields().forEach(function (item) { -#>
+<# c.updateFields().forEach(function (item) { -#>
         col.<#= c.padGoField(item) #>: req.<#= item.goField -#>,
 <# }) -#>
     }
@@ -41,5 +41,19 @@ func (dep DS) <#- c.subModelName()#>List(ctx context.Context) (list []m.<#- v.st
         return
     }
     return
+}
+func (dep DS) Must<#- c.subModelName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>ID m.ID<#= v.structName #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
+	col := m.Table<#= v.structName #>{}.Column()
+	var has bool
+	if has, err = dep.mysql.Main.Query(ctx, &<#= h.firstLow(v.structName) #>, sq.QB{
+		Where:  sq.And(col.ID, sq.Equal(<#= h.firstLow(v.structName) #>ID)),
+	}); err != nil {
+		return
+	}
+	if has == false {
+		err = xerr.Reject(RejectCode.BaseDataNotFound, "", true)
+		return
+	}
+	return
 }
 `
