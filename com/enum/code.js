@@ -72,6 +72,10 @@ func (v <#= v.name #>) Validator(custom ...error) error {
     }
     return nil
 }
+// IsZero
+func (v <#= v.name #>) IsZero() bool {
+    
+}
 // JavaScript code for https://github.com/2type/admin#_enum
 /*
 TA.enum.<#= firstLetterToLowerCase(v.name) #> = [

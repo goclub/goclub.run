@@ -12,11 +12,14 @@ function firstLow(str) {
     if (str == "") {
         return "";
     }
+    if (str == "ID") {
+        return "id"
+    }
     return str.replace(/(^|_)(\w)/g, (m, $1, $2) => $2.toLowerCase());
 }
 
 function snakeToCamel(str) {
-    var out = strToCamel(
+    var out = toCamel(
         str.replace(/([-_][a-z])/g, function (group) {
             return group.toUpperCase().replace("-", "").replace("_", "");
         })
@@ -24,9 +27,25 @@ function snakeToCamel(str) {
     return out;
 }
 
+function indent(n) {
+    if (!n) {
+        n = 1
+    }
+    n *= 4
+    return "\t".repeat(n);
+}
+
+function endSymbol(arr, index, a, b) {
+    if (arr.length - 1 === index) {
+        return b
+    }
+    return a
+}
 
 export default {
     toCamel,
     snakeToCamel,
     firstLow,
+    indent,
+    endSymbol,
 }

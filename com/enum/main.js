@@ -1,3 +1,6 @@
+import hljs from "highlight.js";
+import "highlight.js/lib/languages/go.js";
+import "highlight.js/styles/base16/solarized-light.css";
 import tpl from "./tpl.js"
 import code from "./code.js"
 import * as ejs from "ejs"
@@ -86,8 +89,9 @@ export default {
             }, {delimiter: "#"})
         },
         enumsResultCode() {
-            return this.enumsResult
-            // return Prism.highlight(this.enumsResult, Prism.languages.go, "go")
+            // hljs
+            const vm = this
+            return hljs.highlight("go", vm.enumsResult).value
         }
     },
     methods: {
@@ -155,7 +159,7 @@ export default {
                 return index != removeIndex
             })
         },
-        amendEnumsName() {
+        amendEnumsName(value) {
             const vm = this
             let v = vm.enums.name
             if (v == "") {
@@ -174,12 +178,20 @@ export default {
                 }
                 return item
             })
-            vm.enums.items.forEach(function (item, i) {
+            vm.enums.items.some(function (item, i) {
                 if (i == index) {
                     return
                 }
                 if (item.value == value) {
                     alert(item.field + ":" + item.value + " 重复")
+                    return true
+                }
+            })
+            // vm.enums.items[*].value 如果为 0 则 alert
+            vm.enums.items.some(function (item, index) {
+                if (item.value == 0) {
+                    alert("枚举值不能为 0")
+                    return true
                 }
             })
         },

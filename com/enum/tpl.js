@@ -17,7 +17,7 @@ export default `<div>
     </el-form-item>
     <el-form-item label="items">
         <el-tag  v-if="enums.type != 'uint8'" size="mini" type="info">建议先填 value</el-tag>
-        <el-tag  v-if="enums.type == 'uint8'" size="mini" type="info">建议value从 1 开始，以避免 zero value 特性意外的插入0</el-tag>
+        <el-tag  v-if="enums.type == 'uint8'" size="mini" type="info">value从 1 开始，以避免 zero value 特性意外的插入0</el-tag>
         <el-tag  size="mini" type="info">尽量不要编辑已存在的 value</el-tag>
         <div v-for="(v, i) in enums.items" style="margin-bottom:0.5em;">
             <span style="display:inline-block;min-width:3em;"></span>

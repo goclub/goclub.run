@@ -10,12 +10,12 @@
                 <el-button @click="copyMigrateName">{{ migrateName }}</el-button>
             </el-form-item>
             <el-form-item label="示例配置">
-                <el-button size="mini" type="primary" @click="useAccountExampleData"
-                >account
-                </el-button>
-                <el-button size="mini" type="primary" @click="usePlatformExampleData"
-                >platform
-                </el-button>
+                <el-button-group>
+                    <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash">{{
+                        key
+                        }}
+                    </el-button>
+                </el-button-group>
             </el-form-item>
             <el-form-item label="package">
                 <el-input
@@ -45,6 +45,9 @@
                         placeholder="eg:User"
                         v-model="model.structName"
                 ></el-input>
+            </el-form-item>
+            <el-form-item label="Source" v-if="q.debug">
+                <el-input type="textarea" :value="JSON.stringify(model,false, '    ')"></el-input>
             </el-form-item>
             <el-form-item label="软删">
                 <el-select v-model="model.softDelete" @change="changeSofeDelete">
@@ -97,6 +100,8 @@
                         <th>主键</th>
                         <th>创建</th>
                         <th>更新</th>
+                        <th>分页Req</th>
+                        <th>分页Reply</th>
                         <th>SQL column</th>
                         <th>Go Type</th>
                         <th>Go Field</th>
@@ -113,6 +118,12 @@
                         </td>
                         <td>
                             <el-switch v-model="row.isUpdate"></el-switch>
+                        </td>
+                        <td>
+                            <el-switch v-model="row.pagingReq"></el-switch>
+                        </td>
+                        <td>
+                            <el-switch v-model="row.pagingReply"></el-switch>
                         </td>
                         <td>
                             <el-input
@@ -180,6 +191,7 @@
     </div>
 </template>
 <script>
+import exampleDataHash from "./exampleDataHash.js";
 import model from "./model.js";
 import ds from "./ds.js";
 import ids from "./ids.js";
@@ -188,15 +200,14 @@ import {snakeCase} from "snake-case";
 import copy from "copy-to-clipboard";
 import dayjs from "dayjs";
 import hljs from "highlight.js";
-// 引入 hljs solarized-light 样式
-// 引入 hljs lib lang golang
 import "highlight.js/lib/languages/go.js";
 import "highlight.js/styles/base16/solarized-light.css";
 
 const components = {};
 import h from "./helper.js";
+import * as querystring from "querystring";
 
-const MODEL_KEY = "goclub_boot_tools_model_v2";
+const MODEL_KEY = "goclub.run/model/v3";
 const defaultModel = function () {
     return {
         packageName: "m",
@@ -224,6 +235,9 @@ export default {
         }, 0);
     },
     methods: {
+        useExampleData(key) {
+            this.model = JSON.parse(JSON.stringify(this.exampleDataHash[key]))
+        },
         // 基于index 和 kind(up down) 调整 vm.model[index]的位置
         swapIndex(event, index, kind) {
             const vm = this;
@@ -271,25 +285,127 @@ export default {
             }
             const vm = this;
             const v = vm.model;
-            let maxGoFeildLength = 0;
+            let maxGoFieldLength = 0;
             let maxGoTypeLength = 0;
             vm.model.fields.forEach(function (item) {
-                if (item.goField.length > maxGoFeildLength) {
-                    maxGoFeildLength = item.goField.length;
+                if (item.goField.length > maxGoFieldLength) {
+                    maxGoFieldLength = item.goField.length;
                 }
                 if (item.goType.length > maxGoTypeLength) {
                     maxGoTypeLength = item.goType.length;
                 }
             });
-            maxGoFeildLength++;
+            maxGoFieldLength++;
             maxGoTypeLength++;
             return ejs.render(
                 tpl,
                 {
                     h: h,
                     c: {
-                        subModelName() {
-                            if (v.structName != v.interfaceName) {
+                        SQIFCode(item) {
+                            console.log(item.goType)
+                            switch (item.goType) {
+                                case "string":
+                                    return `${item.goField} != ""`
+                                    break
+                                // 下面代码有什么错误?类型有漏掉什么吗
+                                case "int":
+                                case "int8":
+                                case "int16":
+                                case "int32":
+                                case "int64":
+                                case "uint":
+                                case "uint8":
+                                case "uint16":
+                                case "uint32":
+                                case "uint64":
+                                case "float32":
+                                case "float64":
+                                    return `${item.goField} != 0`
+                                    break
+                                default:
+
+                                    // slice
+                                function hasPrefix(str, prefix) {
+                                    return item.goType.slice(0, prefix.length) === prefix;
+                                }
+
+                                    if (hasPrefix(item.goType, "[]")) {
+                                        return `len(${item.goField}) != 0`
+                                    }
+                                    if (hasPrefix(item.goType, "*")) {
+                                        return `len(${item.goField}) != nil`
+                                    }
+                                    return `${item.goField}.IsZero()`
+                            }
+                        },
+                        needUpdate() {
+                            var need = v.fields.some(function (item) {
+                                return item.isUpdate
+                            })
+                            return need
+                        },
+                        needPaging() {
+                            var need = v.fields.some(function (item) {
+                                if (item.pagingReq) {
+                                    return true
+                                }
+                                if (item.pagingReply) {
+                                    return true
+                                }
+                                return false
+                            })
+                            return need
+                        },
+                        primaryKeyGoSQLWhereCode(indent, prefix) {
+                            if (!indent) {
+                                indent = 2
+                            }
+                            return `sq.` + v.fields.filter(function (v) {
+                                return v.isPrimaryKey;
+                            }).map(function (v) {
+                                var goType = v.goType
+                                if (goType === "custom") {
+                                    goType = v.goTypeCustom
+                                }
+                                return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${h.firstLow(v.goField)})).`
+                            }).join("").replace(/\.$/, '') + ""
+                        },
+                        primaryKeyGoVar() {
+                            return v.fields.filter(function (v) {
+                                return v.isPrimaryKey;
+                            }).map(function (v) {
+                                var goType = v.goType
+                                if (goType === "custom") {
+                                    goType = v.goTypeCustom
+                                }
+                                return h.firstLow(v.goField)
+                            }).join(", ")
+                        },
+                        primaryKeyGoVarType() {
+                            return v.fields.filter(function (v) {
+                                return v.isPrimaryKey;
+                            }).map(function (v) {
+                                var goType = v.goType
+                                if (goType === "custom") {
+                                    goType = v.goTypeCustom
+                                }
+                                return h.firstLow(v.goField) + " " + goType
+                            }).join(", ")
+                        },
+                        primaryKeyGoStructFieldType() {
+                            return h.indent() + v.fields.filter(function (v) {
+                                return v.isPrimaryKey;
+                            }).map(function (v) {
+                                var goType = v.goType
+                                if (goType === "custom") {
+                                    goType = v.goTypeCustom
+                                }
+                                return v.goField + " " + goType
+                            }).join("\n" + h.indent())
+                        },
+                        signName() {
+                            if (v.structName !== v.interfaceName) {
                                 return v.structName.replaceAll(v.interfaceName, '')
                             }
                             return ""
@@ -304,6 +420,16 @@ export default {
                         updateFields: function () {
                             return v.fields.filter(function (v) {
                                 return v.isUpdate;
+                            });
+                        },
+                        pagingReqFields: function () {
+                            return v.fields.filter(function (v) {
+                                return v.pagingReq;
+                            });
+                        },
+                        pagingReplyFields: function () {
+                            return v.fields.filter(function (v) {
+                                return v.pagingReply;
                             });
                         },
                         columnFieldCreateUpdateValueCode() {
@@ -375,18 +501,18 @@ export default {
                             }
                             return ` sq:"${tagItems.join("|")}"`;
                         },
-                        padGoType: function (item) {
+                        padGoType: function (item, prefix) {
                             let type = item.goType;
                             if (type === "custom") {
-                                type = item.goTypeCustom || '';
+                                type = `${prefix}` + item.goTypeCustom || '';
                             }
                             if (v.isIDTypeAlias && item.isPrimaryKey) {
-                                type = "ID" + vm.model.structName;
+                                type = `${prefix}` + "ID" + vm.model.structName;
                             }
                             return type.padEnd(maxGoTypeLength, " ");
                         },
                         padGoField: function (item) {
-                            return item.goField.padEnd(maxGoFeildLength, " ");
+                            return item.goField.padEnd(maxGoFieldLength, " ");
                         },
                         primaryKey: function () {
                             var target = null;
@@ -468,117 +594,6 @@ export default {
                 type: "success",
             });
         },
-        useAccountExampleData() {
-            const vm = this;
-            vm.model = {
-                "packageName": "m",
-                "tableName": "account",
-                "structName": "Account",
-                "interfaceName": "Account",
-                "softDelete": "sq.WithoutSoftDelete",
-                "isAutoIncrement": true,
-                "isIDTypeAlias": true,
-                "customSoftDelete": {
-                    "SoftDeleteWhere": "return sq.Raw{\"`delete_time` IS NULL\", nil}",
-                    "SoftDeleteSet": "return sq.Raw{\"`delete_time` = ?\" ,[]interface{}{time.Now()}}"
-                },
-                "fieldCreateUpdate": "无",
-                "fields": [
-                    {
-                        "isPrimaryKey": true,
-                        "column": "id",
-                        "goType": "string",
-                        "goField": "ID",
-                        "isCreate": false,
-                        "isUpdate": false
-                    },
-                    {
-                        "isPrimaryKey": false,
-                        "column": "platform_kind",
-                        "goType": "custom",
-                        "goField": "PlatformKind",
-                        "goTypeCustom": "PlatformKind",
-                        "isCreate": true,
-                        "isUpdate": false
-                    },
-                    {
-                        "isPrimaryKey": false,
-                        "column": "unionid",
-                        "goType": "string",
-                        "goField": "Unionid",
-                        "isCreate": true,
-                        "isUpdate": false
-                    },
-                    {
-                        "isPrimaryKey": false,
-                        "column": "create_time",
-                        "goType": "time.Time",
-                        "goField": "CreateTime",
-                        "isCreate": false,
-                        "isUpdate": false
-                    }
-                ]
-            }
-        },
-        usePlatformExampleData() {
-            const vm = this;
-            vm.model = {
-                "packageName": "m",
-                "tableName": "platform",
-                "structName": "Platform",
-                "interfaceName": "Account",
-                "softDelete": "sq.WithoutSoftDelete",
-                "isAutoIncrement": false,
-                "isIDTypeAlias": true,
-                "customSoftDelete": {
-                    "SoftDeleteWhere": "return sq.Raw{\"`delete_time` IS NULL\", nil}",
-                    "SoftDeleteSet": "return sq.Raw{\"`delete_time` = ?\" ,[]interface{}{time.Now()}}"
-                },
-                "fieldCreateUpdate": "sq.CreateTimeUpdateTime",
-                "fields": [
-                    {
-                        "isPrimaryKey": true,
-                        "column": "id",
-                        "goType": "string",
-                        "goField": "ID",
-                        "isCreate": true,
-                        "isUpdate": false
-                    },
-                    {
-                        "isPrimaryKey": false,
-                        "column": "title",
-                        "goType": "string",
-                        "goField": "Title",
-                        "goTypeCustom": "",
-                        "isCreate": true,
-                        "isUpdate": true
-                    },
-                    {
-                        "isPrimaryKey": false,
-                        "column": "appid",
-                        "goType": "string",
-                        "goField": "AppID",
-                        "isCreate": true,
-                    },
-                    {
-                        "isPrimaryKey": false,
-                        "column": "app_secret",
-                        "goType": "string",
-                        "goField": "AppSecret",
-                        "isCreate": true,
-                        "isUpdate": true,
-                    },
-                    {
-                        "isPrimaryKey": false,
-                        "column": "kind",
-                        "goType": "custom",
-                        "goField": "Kind",
-                        "goTypeCustom": "PlatformKind",
-                        "isCreate": true,
-                    }
-                ]
-            }
-        },
         blurTableName() {
             const vm = this;
             vm.model.structName = h.toCamel(vm.model.tableName);
@@ -636,6 +651,8 @@ export default {
             }
         }
         return {
+            q: querystring.parse(location.search.slice(1)),
+            exampleDataHash: exampleDataHash,
             migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm") + "_",
             options: {
                 softDelete: [
@@ -688,7 +705,7 @@ export default {
             },
             model: model,
             codeType: ['model', 'ids', 'ds'],
-            codeTypeTab: 'model',
+            codeTypeTab: 'ds',
         };
     },
 };
@@ -700,6 +717,7 @@ export default {
     overflow: auto;
     background: #fdf6e3;
     border-radius: 0.3em;
-
+    tab-size: 2;
 }
+
 </style>
