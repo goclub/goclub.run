@@ -74,7 +74,15 @@ func (v <#= v.name #>) Validator(custom ...error) error {
 }
 // IsZero
 func (v <#= v.name #>) IsZero() bool {
-    
+<# if (v.type == 'uint8') { -#>
+    return v == 0 
+<# } -#>
+<# if (v.type == 'string') { -#>
+    return v == "" 
+<# } -#>
+<# if (v.type == '[]byte') { -#>
+    return len(v) == 0 
+<# } -#>
 }
 // JavaScript code for https://github.com/2type/admin#_enum
 /*
