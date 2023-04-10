@@ -31,7 +31,7 @@ function indent(n) {
     if (!n) {
         n = 1
     }
-    n *= 4
+    n *= 2
     return "\t".repeat(n);
 }
 

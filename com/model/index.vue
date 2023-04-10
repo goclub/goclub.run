@@ -185,6 +185,11 @@
                          :label="fileName(type)" :name="type">
                 <el-button @click="copyFilename(type)" type="primary">复制文件名</el-button>
                 <el-button @click="copyCode(type)" type="primary">复制代码</el-button>
+                <div v-if="codeTypeTab === 'ds'">
+                    <br>
+                    <code>NewDS()</code> <code>type DS </code>
+                    <el-switch v-model="model.codeShowNewDS"></el-switch>
+                </div>
                 <pre class="language-go" v-html="modelResultCode(type)"></pre>
             </el-tab-pane>
         </el-tabs>
@@ -358,6 +363,7 @@ export default {
                             return need
                         },
                         primaryKeyGoSQLWhereCode(indent, prefix) {
+                            prefix = prefix || ""
                             if (!indent) {
                                 indent = 2
                             }
@@ -368,7 +374,7 @@ export default {
                                 if (goType === "custom") {
                                     goType = v.goTypeCustom
                                 }
-                                return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${h.firstLow(v.goField)})).`
+                                return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${h.firstLow(v.goField)}).`
                             }).join("").replace(/\.$/, '') + ""
                         },
                         primaryKeyGoVar() {
@@ -404,11 +410,12 @@ export default {
                                 return v.goField + " " + goType
                             }).join("\n" + h.indent())
                         },
-                        signName() {
+                        signName(d) {
+                            d = d || ""
                             if (v.structName !== v.interfaceName) {
                                 return v.structName.replaceAll(v.interfaceName, '')
                             }
-                            return ""
+                            return d
                         },
 
                         // 要创建的字段
@@ -502,6 +509,7 @@ export default {
                             return ` sq:"${tagItems.join("|")}"`;
                         },
                         padGoType: function (item, prefix) {
+                            prefix = prefix || ""
                             let type = item.goType;
                             if (type === "custom") {
                                 type = `${prefix}` + item.goTypeCustom || '';
@@ -712,8 +720,7 @@ export default {
 </script>
 <style>
 .language-go {
-    padding: 1em;
-    margin-right: 0.5em;
+    padding: 0 0.5em;
     overflow: auto;
     background: #fdf6e3;
     border-radius: 0.3em;
