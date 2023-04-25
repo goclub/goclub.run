@@ -1,9 +1,8 @@
 export default `
-<#if (v.codeShowNewDS) { -#>
+<#if (v.isNewInteface) { -#>
 package <#- v.interfaceName #>
-
 import sl "github.com/goclub/slice"
-
+import sq "github.com/goclub/sql"
 func NewDS(
 	config *Conf.Config,
 	log Logger.Logger,
@@ -71,7 +70,7 @@ func (dep DS) <#- c.signName(v.structName) #>s(ctx context.Context) (list []m.<#
 func (dep DS) <#- c.signName(v.structName)#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, has<#= v.structName #> bool, err error){
 	col := m.<#= v.structName #>{}.Column()
 	if has<#= v.structName #>, err = dep.mysql.Main.Query(ctx, &<#= h.firstLow(v.structName) #>, sq.QB{
-		Where:  <#= c.primaryKeyGoSQLWhereCode(3) #>),
+		Where:  <#= c.primaryKeyGoSQLWhereCode(3) #>,
 	}); err != nil {
 		return
 	}
@@ -88,8 +87,36 @@ func (dep DS) Must<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarT
 	}
 	return
 }
+func (dep DS) Has<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (has<#= v.structName #> bool, err error){
+	col := m.<#= v.structName #>{}.Column()
+	if has<#= v.structName #>, err = dep.mysql.Main.Has(ctx, &m.<#= v.structName #>{}, sq.QB{
+		Where:  <#= c.primaryKeyGoSQLWhereCode(3) #>,
+	}); err != nil {
+		return
+	}
+	return
+}
+func (dep DS) Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have<#= v.structName #> bool, err error) {
+	<#= h.firstLow(v.structName) #>IDs = sl.Unique(<#= h.firstLow(v.structName) #>IDs)
+	col := m.<#= v.structName #>{}.Column()
+	var count uint64
+	if count, err = dep.mysql.Main.Count(ctx, &m.<#= v.structName #>{}, sq.QB{
+ 		Where:  sq.
+ 			And(col.ID, sq.In(<#= h.firstLow(v.structName) #>IDs)),
+ 	}); err != nil {
+	    return
+	}
+	if count == 0 {
+		return
+	} else if count == uint64(len(<#= h.firstLow(v.structName) #>IDs)) {
+		have<#= v.structName #> = true
+		return
+	}  else {
+		return
+	}
+}
 <# if (c.needPaging()) { -#>
-func (dep DS) Paging(ctx context.Context, req I<#- v.interfaceName #>.Paging<#- c.signName()#>Request) (reply I<#- v.interfaceName #>.Paging<#- c.signName()#>Reply, total uint64, err error){
+func (dep DS) Paging<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Paging<#- c.signName()#>Request) (reply I<#- v.interfaceName #>.Paging<#- c.signName()#>Reply, err error){
 	col := m.<#= v.structName #>{}.Column()
 	var list  []m.<#- v.structName#>
 	var qb = sq.QB{
@@ -102,7 +129,7 @@ func (dep DS) Paging(ctx context.Context, req I<#- v.interfaceName #>.Paging<#- 
 	if reply.Total, err = dep.mysql.Main.Count(ctx, &m.<#= v.structName #>{}, qb); err != nil {
 	    return
     }
-    if total == 0 {
+    if reply.Total == 0 {
         return
     }
     if err = dep.mysql.Main.QuerySlice(ctx, &list, qb.Paging(req.Page, req.PerPage)); err != nil {

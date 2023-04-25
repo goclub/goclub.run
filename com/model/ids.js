@@ -1,11 +1,12 @@
 export default `
+<#if (v.isNewInteface) { -#>
 package I<#- v.interfaceName #>
-
 type DS interface {
-	// Create 创建 
+<# } -#>
+	// Create<#- c.signName()#> 创建 
 	Create<#- c.signName()#>(ctx context.Context, req Create<#- c.signName() #>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
 <#if (c.needUpdate()) { -#>
-	// Update 更新
+	// Update<#- c.signName()#> 更新
 	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request) (err error)
 <# } -#>
 	// <#- c.signName(v.structName) #>s 查询(所有)
@@ -19,9 +20,11 @@ type DS interface {
 	// Have<#- c.signName()#> 存在(多) 入参主键的数量与数据库中数据的数量相等则返回 true
 	Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have bool, err error)
 <# if (c.needPaging()) { -#>	// Paging 分页
-	Paging(ctx context.Context, req Paging<#- c.signName()#>Request) (reply Paging<#- c.signName()#>Reply, err error)
+	Paging<#- c.signName()#>(ctx context.Context, req Paging<#- c.signName()#>Request) (reply Paging<#- c.signName()#>Reply, err error)
 <# } -#>
+<#if (v.isNewInteface) { -#>
 } 
+<# } -#>
 
 <#if (c.needPaging()) { -#>  
 type Paging<#- c.signName()#>Request struct {	

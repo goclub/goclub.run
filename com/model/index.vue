@@ -17,13 +17,13 @@
                     </el-button>
                 </el-button-group>
             </el-form-item>
-            <el-form-item label="package">
-                <el-input
-                        style="width: 10em"
-                        placeholder="eg:user"
-                        v-model="model.packageName"
-                ></el-input>
-            </el-form-item>
+            <!--            <el-form-item label="package">-->
+            <!--                <el-input-->
+            <!--                        style="width: 10em"-->
+            <!--                        placeholder="eg:user"-->
+            <!--                        v-model="model.packageName"-->
+            <!--                ></el-input>-->
+            <!--            </el-form-item>-->
             <el-form-item label="interface">
                 <el-input
                         style="width: 10em"
@@ -185,10 +185,10 @@
                          :label="fileName(type)" :name="type">
                 <el-button @click="copyFilename(type)" type="primary">复制文件名</el-button>
                 <el-button @click="copyCode(type)" type="primary">复制代码</el-button>
-                <div v-if="codeTypeTab === 'ds'">
+                <div v-if="codeTypeTab === 'ds' || codeTypeTab === 'ids'">
                     <br>
-                    <code>NewDS()</code> <code>type DS </code>
-                    <el-switch v-model="model.codeShowNewDS"></el-switch>
+                    新接口:
+                    <el-switch v-model="model.isNewInteface"></el-switch>
                 </div>
                 <pre class="language-go" v-html="modelResultCode(type)"></pre>
             </el-tab-pane>
@@ -215,6 +215,7 @@ import * as querystring from "querystring";
 const MODEL_KEY = "goclub.run/model/v3";
 const defaultModel = function () {
     return {
+        isNewInteface: true,
         packageName: "m",
         tableName: "",
         structName: "",
@@ -374,17 +375,17 @@ export default {
                                 if (goType === "custom") {
                                     goType = v.goTypeCustom
                                 }
-                                return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${h.firstLow(v.goField)}).`
+                                var field = v.goField
+                                if (!prefix) {
+                                    field = h.firstLow(field)
+                                }
+                                return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${field})).`
                             }).join("").replace(/\.$/, '') + ""
                         },
-                        primaryKeyGoVar() {
+                        primaryKeyGoVar(isSlice) {
                             return v.fields.filter(function (v) {
                                 return v.isPrimaryKey;
                             }).map(function (v) {
-                                var goType = v.goType
-                                if (goType === "custom") {
-                                    goType = v.goTypeCustom
-                                }
                                 return h.firstLow(v.goField)
                             }).join(", ")
                         },
@@ -395,6 +396,9 @@ export default {
                                 var goType = v.goType
                                 if (goType === "custom") {
                                     goType = v.goTypeCustom
+                                }
+                                if (v.isPrimaryKey && vm.model.isIDTypeAlias) {
+                                    goType = "m.ID" + vm.model.structName
                                 }
                                 return h.firstLow(v.goField) + " " + goType
                             }).join(", ")

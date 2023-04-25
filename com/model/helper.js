@@ -15,7 +15,16 @@ function firstLow(str) {
     if (str == "ID") {
         return "id"
     }
+    if (str.length >= 2) {
+        if (isUpperCase(str[0]) && isUpperCase(str[1])) {
+            return str
+        }
+    }
     return str.replace(/(^|_)(\w)/g, (m, $1, $2) => $2.toLowerCase());
+}
+
+function isUpperCase(str) {
+    return str === str.toUpperCase();
 }
 
 function snakeToCamel(str) {
