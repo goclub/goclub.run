@@ -1,8 +1,9 @@
 export default `
-<#if (v.isNewInteface) { -#>
 package I<#- v.interfaceName #>
-type DS interface {
-<# } -#>
+
+import vd "github.com/og/juice/validator"
+
+type coreDS<#- c.signName()#> interface {
 	// Create<#- c.signName()#> 创建 
 	Create<#- c.signName()#>(ctx context.Context, req Create<#- c.signName() #>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
 <#if (c.needUpdate()) { -#>
@@ -19,13 +20,10 @@ type DS interface {
 	Has<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (has bool, err error)
 	// Have<#- c.signName()#> 存在(多) 入参主键的数量与数据库中数据的数量相等则返回 true
 	Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have bool, err error)
-<# if (c.needPaging()) { -#>	// Paging 分页
+<# if (c.needPaging()) { -#>	// Paging<#- c.signName()#> 分页
 	Paging<#- c.signName()#>(ctx context.Context, req Paging<#- c.signName()#>Request) (reply Paging<#- c.signName()#>Reply, err error)
 <# } -#>
-<#if (v.isNewInteface) { -#>
-} 
-<# } -#>
-
+}
 <#if (c.needPaging()) { -#>  
 type Paging<#- c.signName()#>Request struct {	
 <# c.pagingReqFields().forEach(function (item) { -#>

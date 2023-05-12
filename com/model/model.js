@@ -51,19 +51,16 @@ func (v *<#= v.structName #>) AfterInsert(result sq.Result) (err error) {
 }
 <# } #>
 // Column 列名字典
-type column<#= v.structName #>Type struct{
+func (v Table<#= v.structName #>) Column() (col struct{
 <# v.fields.forEach(function (item) { -#>
     <#= c.padGoField(item)#> sq.Column
 <#})-#>
     <#- c.columnFieldCreateUpdateTypeCode() #>
-}
-var column<#= v.structName #>Value =  column<#= v.structName #>Type{
+}) {
 <# v.fields.forEach(function (item) { -#>
-    <#= c.padGoField(item)#>: "<#= item.column#>"
+    col.<#= c.padGoField(item)#>=  "<#= item.column#>"
 <#}) -#>
     <#- c.columnFieldCreateUpdateValueCode() #>
-}
-func (v Table<#= v.structName #>) Column() (col column<#= v.structName #>Type) {
-    return column<#= v.structName #>Value
+    return
 }
 `

@@ -17,13 +17,6 @@
                     </el-button>
                 </el-button-group>
             </el-form-item>
-            <!--            <el-form-item label="package">-->
-            <!--                <el-input-->
-            <!--                        style="width: 10em"-->
-            <!--                        placeholder="eg:user"-->
-            <!--                        v-model="model.packageName"-->
-            <!--                ></el-input>-->
-            <!--            </el-form-item>-->
             <el-form-item label="interface">
                 <el-input
                         style="width: 10em"
@@ -44,6 +37,13 @@
                         style="width: 12em"
                         placeholder="eg:User"
                         v-model="model.structName"
+                ></el-input>
+            </el-form-item>
+            <el-form-item label="sign mame">
+                <el-input
+                        style="width: 30em"
+                        :placeholder="'非必填,默认值:' + model.structName.replaceAll(model.interfaceName, '')"
+                        v-model="model.signName"
                 ></el-input>
             </el-form-item>
             <el-form-item label="Source" v-if="q.debug">
@@ -185,11 +185,11 @@
                          :label="fileName(type)" :name="type">
                 <el-button @click="copyFilename(type)" type="primary">复制文件名</el-button>
                 <el-button @click="copyCode(type)" type="primary">复制代码</el-button>
-                <div v-if="codeTypeTab === 'ds' || codeTypeTab === 'ids'">
-                    <br>
-                    新接口:
-                    <el-switch v-model="model.isNewInteface"></el-switch>
-                </div>
+                <!--                <div v-if="codeTypeTab === 'ds' || codeTypeTab === 'ids'">-->
+                <!--                    <br>-->
+                <!--                    新接口:-->
+                <!--                    <el-switch v-model="model.isNewInteface"></el-switch>-->
+                <!--                </div>-->
                 <pre class="language-go" v-html="modelResultCode(type)"></pre>
             </el-tab-pane>
         </el-tabs>
@@ -200,6 +200,8 @@ import exampleDataHash from "./exampleDataHash.js";
 import model from "./model.js";
 import ds from "./ds.js";
 import ids from "./ids.js";
+import base from "./base.js";
+import ibase from "./ibase.js";
 import * as ejs from "ejs";
 import {snakeCase} from "snake-case";
 import copy from "copy-to-clipboard";
@@ -219,6 +221,7 @@ const defaultModel = function () {
         packageName: "m",
         tableName: "",
         structName: "",
+        signName: "",
         softDelete: "",
         customSoftDelete: {
             SoftDeleteWhere: ``,
@@ -282,6 +285,12 @@ export default {
                 case "model":
                     tpl = model;
                     break;
+                case 'ibase':
+                    tpl = ibase;
+                    break
+                case 'base':
+                    tpl = base;
+                    break
                 case "ds":
                     tpl = ds;
                     break;
@@ -342,7 +351,7 @@ export default {
                                     if (hasPrefix(item.goType, "*")) {
                                         return `len(${item.goField}) != nil`
                                     }
-                                    return `${item.goField}.IsZero()`
+                                    return `!${item.goField}.IsZero()`
                             }
                         },
                         needUpdate() {
@@ -416,6 +425,9 @@ export default {
                         },
                         signName(d) {
                             d = d || ""
+                            if (v.signName) {
+                                return v.signName
+                            }
                             if (v.structName !== v.interfaceName) {
                                 return v.structName.replaceAll(v.interfaceName, '')
                             }
@@ -583,10 +595,13 @@ export default {
         },
         fileName(type) {
             const vm = this;
+            var name = snakeCase(vm.model.tableName)
             var hash = {
-                "model": "sql_" + snakeCase(vm.model.tableName) + ".go",
-                "ds": "ds.go",
-                "ids": "interface/ds.go",
+                'ibase': 'inteface/ds.go',
+                'base': 'ds.go',
+                "model": "../1model/sql_" + name + ".go",
+                "ds": "ds_" + name + ".go",
+                "ids": "interface/ds_" + name + ".go",
             }
             return hash[type]
         },
@@ -716,8 +731,8 @@ export default {
                 },
             },
             model: model,
-            codeType: ['model', 'ids', 'ds'],
-            codeTypeTab: 'ds',
+            codeType: ['model', 'ibase', 'base', 'ids', 'ds'],
+            codeTypeTab: 'model',
         };
     },
 };
