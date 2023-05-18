@@ -1,7 +1,7 @@
 export default `
 package I<#- v.interfaceName #>
 
-import vd "github.com/og/juice/validator"
+import vd "github.com/goclub/validator"
 
 type coreDS<#- c.signName()#> interface {
 	// Create<#- c.signName()#> 创建 
