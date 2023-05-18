@@ -606,7 +606,9 @@ export default {
 if [ -f "${vm.fileName(type)}" ]; then
     echo -e "\\033[1;33mfail:file exist\\033[0m"
 else
-    cat << 'EOF' > ${vm.fileName(type)}${vm.modelResult(type)}EOF
+    dir=$(dirname "${vm.fileName(type)}")
+    mkdir -p "$dir"
+    cat << 'EOF' > ${vm.fileName(type)}\n${vm.modelResult(type)}EOF
     if [ -f "${vm.fileName(type)}" ]; then
         echo -e "\\033[1;32msuccess: file created\\033[0m"
     fi
