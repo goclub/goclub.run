@@ -34,8 +34,9 @@ export default `<div>
         <el-button size="mini" type="primary" @click="markEnumsBySource" >覆盖</el-button>
     </el-form-item>
     </el-form> 
-    <el-button @click="copyFilename" >复制文件名:{{enumsFileName}}</el-button>
-    <el-button @click="copyCode" >复制代码</el-button>
+    <el-button @click="copyCreateFile" type="primary" size="mini" >快速创建</el-button>
+    <el-button @click="copyFilename" size="mini" >复制文件名:{{enumsFileName}}</el-button>
+    <el-button @click="copyCode" size="mini" >复制代码</el-button>
     <pre style="margin-top:0;margin-right:0.5em;" class="language-go" v-html="enumsResultCode" ></pre>
     <el-button @click="copyCode" >复制代码</el-button>
 </div>

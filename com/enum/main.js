@@ -95,6 +95,15 @@ export default {
         }
     },
     methods: {
+        copyCreateFile() {
+            const vm = this
+            var code = `cat << 'EOF' > ${vm.enumsFileName}\n${vm.enumsResult}\nEOF`
+            copy(code)
+            vm.$message({
+                message: '命令已到粘贴板,请在终端或命令行粘贴命令执行',
+                type: "success",
+            });
+        },
         copyFilename() {
             const vm = this
             copy(vm.enumsFileName)

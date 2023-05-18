@@ -39,7 +39,7 @@
                         v-model="model.structName"
                 ></el-input>
             </el-form-item>
-            <el-form-item label="sign mame">
+            <el-form-item label="sign name">
                 <el-input
                         style="width: 30em"
                         :placeholder="'非必填,默认值:' + model.structName.replaceAll(model.interfaceName, '')"
@@ -183,13 +183,9 @@
         <el-tabs v-model="codeTypeTab">
             <el-tab-pane v-for="type in codeType" :key="type"
                          :label="fileName(type)" :name="type">
-                <el-button @click="copyFilename(type)" type="primary">复制文件名</el-button>
-                <el-button @click="copyCode(type)" type="primary">复制代码</el-button>
-                <!--                <div v-if="codeTypeTab === 'ds' || codeTypeTab === 'ids'">-->
-                <!--                    <br>-->
-                <!--                    新接口:-->
-                <!--                    <el-switch v-model="model.isNewInteface"></el-switch>-->
-                <!--                </div>-->
+                <el-button @click="copyCreateFile(type)" type="primary" size="mini">快速创建</el-button>
+                <el-button @click="copyFilename(type)" size="mini">复制文件名</el-button>
+                <el-button @click="copyCode(type)" size="mini">复制代码</el-button>
                 <pre class="language-go" v-html="modelResultCode(type)"></pre>
             </el-tab-pane>
         </el-tabs>
@@ -217,7 +213,6 @@ import * as querystring from "querystring";
 const MODEL_KEY = "goclub.run/model/v3";
 const defaultModel = function () {
     return {
-        isNewInteface: true,
         packageName: "m",
         tableName: "",
         structName: "",
@@ -597,13 +592,31 @@ export default {
             const vm = this;
             var name = snakeCase(vm.model.tableName)
             var hash = {
-                'ibase': 'inteface/ds.go',
+                'ibase': 'interface/ds.go',
                 'base': 'ds.go',
                 "model": "../1model/sql_" + name + ".go",
                 "ds": "ds_" + name + ".go",
                 "ids": "interface/ds_" + name + ".go",
             }
             return hash[type]
+        },
+        copyCreateFile(type) {
+            const vm = this
+            var code = `
+if [ -f "${vm.fileName(type)}" ]; then
+    echo -e "\\033[1;33mfail:file exist\\033[0m"
+else
+    cat << 'EOF' > ${vm.fileName(type)}${vm.modelResult(type)}EOF
+    if [ -f "${vm.fileName(type)}" ]; then
+        echo -e "\\033[1;32msuccess: file created\\033[0m"
+    fi
+fi
+            `
+            copy(code)
+            vm.$message({
+                message: '命令已到粘贴板,请打开终端/命令行进入 internal/{模块} 目录下执行',
+                type: "success",
+            });
         },
         copyFilename(type) {
             const vm = this;
