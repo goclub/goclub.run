@@ -731,7 +731,7 @@ export default {
                 },
             },
             model: model,
-            codeType: ['model', 'ibase', 'base', 'ids', 'ds'],
+            codeType: ['model', 'ibase', 'ids', 'base', 'ds'],
             codeTypeTab: 'model',
         };
     },
