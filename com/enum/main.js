@@ -236,6 +236,7 @@ export default {
                 name: "",
                 type: "uint8",
                 items: [],
+                matchCode: location.href.indexOf('match') != -1,
             },
             model: {
                 tableName: "",

@@ -96,5 +96,23 @@ TA.enum.<#= firstLetterToLowerCase(v.name) #> = [
 <# }) -#>
 ]
 */
+<# if(v.matchCode) {#>
+// Match Type safe match of all values, likeness switch
+func (v <#= v.name #>) Match(
+<# v.items.forEach(function (item) { -#>
+    <#= item.field#> func(_ struct{<#= item.field#> bool}) (err error),
+<# }) -#>
+) error {
+    e := v.Enum()
+    switch v {
+    default:
+        return xerr.New(fmt.Sprintf("PlatformKind can not be %s", v))
+<# v.items.forEach(function (item) { -#>
+    case e.<#= item.field#>:
+        return <#= item.field#>(struct{ <#= item.field#> bool } {})
+<# }) -#>
+    }
+}
+<# } #>
 // ---------------------- DO NOT EDIT (End) ----------------------
 `

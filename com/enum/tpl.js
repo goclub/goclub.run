@@ -33,9 +33,9 @@ export default `<div>
         <el-input placeholder="非必填" size="mini" style="width:20em;" v-model="source.enums"></el-input>
         <el-button size="mini" type="primary" @click="markEnumsBySource" >覆盖</el-button>
     </el-form-item>
+    </el-form> 
     <el-button @click="copyFilename" >复制文件名:{{enumsFileName}}</el-button>
     <el-button @click="copyCode" >复制代码</el-button>
-    </el-form> 
     <pre style="margin-top:0;margin-right:0.5em;" class="language-go" v-html="enumsResultCode" ></pre>
     <el-button @click="copyCode" >复制代码</el-button>
 </div>
