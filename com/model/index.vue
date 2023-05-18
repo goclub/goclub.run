@@ -274,7 +274,7 @@ export default {
                     break;
             }
         },
-        modelResult(type) {
+        modelResult(type, kind) {
             var tpl = "";
             switch (type) {
                 case "model":
@@ -307,243 +307,247 @@ export default {
             });
             maxGoFieldLength++;
             maxGoTypeLength++;
+            var c = {
+                SQIFCode(item) {
+                    console.log(item.goType)
+                    switch (item.goType) {
+                        case "string":
+                            return `${item.goField} != ""`
+                            break
+                        // 下面代码有什么错误?类型有漏掉什么吗
+                        case "int":
+                        case "int8":
+                        case "int16":
+                        case "int32":
+                        case "int64":
+                        case "uint":
+                        case "uint8":
+                        case "uint16":
+                        case "uint32":
+                        case "uint64":
+                        case "float32":
+                        case "float64":
+                            return `${item.goField} != 0`
+                            break
+                        default:
+
+                            // slice
+                        function hasPrefix(str, prefix) {
+                            return item.goType.slice(0, prefix.length) === prefix;
+                        }
+
+                            if (hasPrefix(item.goType, "[]")) {
+                                return `len(${item.goField}) != 0`
+                            }
+                            if (hasPrefix(item.goType, "*")) {
+                                return `len(${item.goField}) != nil`
+                            }
+                            return `!${item.goField}.IsZero()`
+                    }
+                },
+                needUpdate() {
+                    var need = v.fields.some(function (item) {
+                        return item.isUpdate
+                    })
+                    return need
+                },
+                needPaging() {
+                    var need = v.fields.some(function (item) {
+                        if (item.pagingReq) {
+                            return true
+                        }
+                        if (item.pagingReply) {
+                            return true
+                        }
+                        return false
+                    })
+                    return need
+                },
+                primaryKeyGoSQLWhereCode(indent, prefix) {
+                    prefix = prefix || ""
+                    if (!indent) {
+                        indent = 2
+                    }
+                    return `sq.` + v.fields.filter(function (v) {
+                        return v.isPrimaryKey;
+                    }).map(function (v) {
+                        var goType = v.goType
+                        if (goType === "custom") {
+                            goType = v.goTypeCustom
+                        }
+                        var field = v.goField
+                        if (!prefix) {
+                            field = h.firstLow(field)
+                        }
+                        return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${field})).`
+                    }).join("").replace(/\.$/, '') + ""
+                },
+                primaryKeyGoVar(isSlice) {
+                    return v.fields.filter(function (v) {
+                        return v.isPrimaryKey;
+                    }).map(function (v) {
+                        return h.firstLow(v.goField)
+                    }).join(", ")
+                },
+                primaryKeyGoVarType() {
+                    return v.fields.filter(function (v) {
+                        return v.isPrimaryKey;
+                    }).map(function (v) {
+                        var goType = v.goType
+                        if (goType === "custom") {
+                            goType = v.goTypeCustom
+                        }
+                        if (v.isPrimaryKey && vm.model.isIDTypeAlias) {
+                            goType = "m.ID" + vm.model.structName
+                        }
+                        return h.firstLow(v.goField) + " " + goType
+                    }).join(", ")
+                },
+                primaryKeyGoStructFieldType() {
+                    return h.indent() + v.fields.filter(function (v) {
+                        return v.isPrimaryKey;
+                    }).map(function (v) {
+                        var goType = v.goType
+                        if (goType === "custom") {
+                            goType = v.goTypeCustom
+                        }
+                        return v.goField + " " + goType
+                    }).join("\n" + h.indent())
+                },
+                signName(d) {
+                    d = d || ""
+                    if (v.signName) {
+                        return v.signName
+                    }
+                    if (v.structName !== v.interfaceName) {
+                        return v.structName.replaceAll(v.interfaceName, '')
+                    }
+                    return d
+                },
+
+                // 要创建的字段
+                createFields: function () {
+                    return v.fields.filter(function (v) {
+                        return v.isCreate;
+                    });
+                },
+                updateFields: function () {
+                    return v.fields.filter(function (v) {
+                        return v.isUpdate;
+                    });
+                },
+                pagingReqFields: function () {
+                    return v.fields.filter(function (v) {
+                        return v.pagingReq;
+                    });
+                },
+                pagingReplyFields: function () {
+                    return v.fields.filter(function (v) {
+                        return v.pagingReply;
+                    });
+                },
+                columnFieldCreateUpdateValueCode() {
+                    let code = "";
+                    switch (vm.model.fieldCreateUpdate) {
+                        case "sq.CreatedAtUpdatedAt":
+                            code = `col.CreatedAt = "created_at"\n    col.UpdatedAt = "updated_at"`;
+                            break;
+                        case "sq.CreateTimeUpdateTime":
+                            code = `col.CreateTime = "create_time"\n    col.UpdateTime = "update_time"`;
+                            break;
+                        case "sq.GMTCreateGMTUpdate":
+                            code = `col.GMTCreate = "gmt_create"\n    col.GMTUpdate = "gmt_update"`;
+                            break;
+                        default:
+                    }
+                    return code;
+                },
+                columnFieldCreateUpdateTypeCode() {
+                    let code = "";
+                    switch (vm.model.fieldCreateUpdate) {
+                        case "sq.CreatedAtUpdatedAt":
+                            code = `CreatedAt sq.Column\n    UpdatedAt sq.Column`;
+                            break;
+                        case "sq.CreateTimeUpdateTime":
+                            code = `CreateTime sq.Column\n    UpdateTime sq.Column`;
+                            break;
+                        case "sq.GMTCreateGMTUpdate":
+                            code = `GMTCreate sq.Column\n    GMTUpdate sq.Column`;
+                            break;
+                        default:
+                    }
+                    return code;
+                },
+                autoIncrementValueCode: function () {
+                    let target = {};
+                    v.fields.some(function (item) {
+                        if (item.isPrimaryKey) {
+                            target = item;
+                            return true;
+                        }
+                    });
+                    let code = "id";
+                    if (target.goType != "uint64") {
+                        code = `${target.goType}(${code})`;
+                    }
+                    if (v.isIDTypeAlias) {
+                        code = `ID${vm.model.structName}(${code})`;
+                    }
+                    return code;
+                },
+                autoIncrementItem: function () {
+                    let out = false;
+                    v.fields.some(function (item) {
+                        if (item.isPrimaryKey) {
+                            out = item;
+                            return true;
+                        }
+                    });
+                    return out;
+                },
+                sqTag(item) {
+                    var tagItems = [];
+                    if (item.isPrimaryKey && v.isAutoIncrement) {
+                        tagItems.push("ignoreInsert");
+                    }
+                    if (tagItems.length == 0) {
+                        return "";
+                    }
+                    return ` sq:"${tagItems.join("|")}"`;
+                },
+                padGoType: function (item, prefix) {
+                    prefix = prefix || ""
+                    let type = item.goType;
+                    if (type === "custom") {
+                        type = `${prefix}` + item.goTypeCustom || '';
+                    }
+                    if (v.isIDTypeAlias && item.isPrimaryKey) {
+                        type = `${prefix}` + "ID" + vm.model.structName;
+                    }
+                    return type.padEnd(maxGoTypeLength, " ");
+                },
+                padGoField: function (item) {
+                    return item.goField.padEnd(maxGoFieldLength, " ");
+                },
+                primaryKey: function () {
+                    var target = null;
+                    v.fields.some(function (item) {
+                        if (item.isPrimaryKey) {
+                            target = item;
+                            return true;
+                        }
+                    });
+                    return target;
+                },
+            }
+            if (kind === "onlySignName") {
+                return c.signName()
+            }
             return ejs.render(
                 tpl,
                 {
                     h: h,
-                    c: {
-                        SQIFCode(item) {
-                            console.log(item.goType)
-                            switch (item.goType) {
-                                case "string":
-                                    return `${item.goField} != ""`
-                                    break
-                                // 下面代码有什么错误?类型有漏掉什么吗
-                                case "int":
-                                case "int8":
-                                case "int16":
-                                case "int32":
-                                case "int64":
-                                case "uint":
-                                case "uint8":
-                                case "uint16":
-                                case "uint32":
-                                case "uint64":
-                                case "float32":
-                                case "float64":
-                                    return `${item.goField} != 0`
-                                    break
-                                default:
-
-                                    // slice
-                                function hasPrefix(str, prefix) {
-                                    return item.goType.slice(0, prefix.length) === prefix;
-                                }
-
-                                    if (hasPrefix(item.goType, "[]")) {
-                                        return `len(${item.goField}) != 0`
-                                    }
-                                    if (hasPrefix(item.goType, "*")) {
-                                        return `len(${item.goField}) != nil`
-                                    }
-                                    return `!${item.goField}.IsZero()`
-                            }
-                        },
-                        needUpdate() {
-                            var need = v.fields.some(function (item) {
-                                return item.isUpdate
-                            })
-                            return need
-                        },
-                        needPaging() {
-                            var need = v.fields.some(function (item) {
-                                if (item.pagingReq) {
-                                    return true
-                                }
-                                if (item.pagingReply) {
-                                    return true
-                                }
-                                return false
-                            })
-                            return need
-                        },
-                        primaryKeyGoSQLWhereCode(indent, prefix) {
-                            prefix = prefix || ""
-                            if (!indent) {
-                                indent = 2
-                            }
-                            return `sq.` + v.fields.filter(function (v) {
-                                return v.isPrimaryKey;
-                            }).map(function (v) {
-                                var goType = v.goType
-                                if (goType === "custom") {
-                                    goType = v.goTypeCustom
-                                }
-                                var field = v.goField
-                                if (!prefix) {
-                                    field = h.firstLow(field)
-                                }
-                                return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${field})).`
-                            }).join("").replace(/\.$/, '') + ""
-                        },
-                        primaryKeyGoVar(isSlice) {
-                            return v.fields.filter(function (v) {
-                                return v.isPrimaryKey;
-                            }).map(function (v) {
-                                return h.firstLow(v.goField)
-                            }).join(", ")
-                        },
-                        primaryKeyGoVarType() {
-                            return v.fields.filter(function (v) {
-                                return v.isPrimaryKey;
-                            }).map(function (v) {
-                                var goType = v.goType
-                                if (goType === "custom") {
-                                    goType = v.goTypeCustom
-                                }
-                                if (v.isPrimaryKey && vm.model.isIDTypeAlias) {
-                                    goType = "m.ID" + vm.model.structName
-                                }
-                                return h.firstLow(v.goField) + " " + goType
-                            }).join(", ")
-                        },
-                        primaryKeyGoStructFieldType() {
-                            return h.indent() + v.fields.filter(function (v) {
-                                return v.isPrimaryKey;
-                            }).map(function (v) {
-                                var goType = v.goType
-                                if (goType === "custom") {
-                                    goType = v.goTypeCustom
-                                }
-                                return v.goField + " " + goType
-                            }).join("\n" + h.indent())
-                        },
-                        signName(d) {
-                            d = d || ""
-                            if (v.signName) {
-                                return v.signName
-                            }
-                            if (v.structName !== v.interfaceName) {
-                                return v.structName.replaceAll(v.interfaceName, '')
-                            }
-                            return d
-                        },
-
-                        // 要创建的字段
-                        createFields: function () {
-                            return v.fields.filter(function (v) {
-                                return v.isCreate;
-                            });
-                        },
-                        updateFields: function () {
-                            return v.fields.filter(function (v) {
-                                return v.isUpdate;
-                            });
-                        },
-                        pagingReqFields: function () {
-                            return v.fields.filter(function (v) {
-                                return v.pagingReq;
-                            });
-                        },
-                        pagingReplyFields: function () {
-                            return v.fields.filter(function (v) {
-                                return v.pagingReply;
-                            });
-                        },
-                        columnFieldCreateUpdateValueCode() {
-                            let code = "";
-                            switch (vm.model.fieldCreateUpdate) {
-                                case "sq.CreatedAtUpdatedAt":
-                                    code = `col.CreatedAt = "created_at"\n    col.UpdatedAt = "updated_at"`;
-                                    break;
-                                case "sq.CreateTimeUpdateTime":
-                                    code = `col.CreateTime = "create_time"\n    col.UpdateTime = "update_time"`;
-                                    break;
-                                case "sq.GMTCreateGMTUpdate":
-                                    code = `col.GMTCreate = "gmt_create"\n    col.GMTUpdate = "gmt_update"`;
-                                    break;
-                                default:
-                            }
-                            return code;
-                        },
-                        columnFieldCreateUpdateTypeCode() {
-                            let code = "";
-                            switch (vm.model.fieldCreateUpdate) {
-                                case "sq.CreatedAtUpdatedAt":
-                                    code = `CreatedAt sq.Column\n    UpdatedAt sq.Column`;
-                                    break;
-                                case "sq.CreateTimeUpdateTime":
-                                    code = `CreateTime sq.Column\n    UpdateTime sq.Column`;
-                                    break;
-                                case "sq.GMTCreateGMTUpdate":
-                                    code = `GMTCreate sq.Column\n    GMTUpdate sq.Column`;
-                                    break;
-                                default:
-                            }
-                            return code;
-                        },
-                        autoIncrementValueCode: function () {
-                            let target = {};
-                            v.fields.some(function (item) {
-                                if (item.isPrimaryKey) {
-                                    target = item;
-                                    return true;
-                                }
-                            });
-                            let code = "id";
-                            if (target.goType != "uint64") {
-                                code = `${target.goType}(${code})`;
-                            }
-                            if (v.isIDTypeAlias) {
-                                code = `ID${vm.model.structName}(${code})`;
-                            }
-                            return code;
-                        },
-                        autoIncrementItem: function () {
-                            let out = false;
-                            v.fields.some(function (item) {
-                                if (item.isPrimaryKey) {
-                                    out = item;
-                                    return true;
-                                }
-                            });
-                            return out;
-                        },
-                        sqTag(item) {
-                            var tagItems = [];
-                            if (item.isPrimaryKey && v.isAutoIncrement) {
-                                tagItems.push("ignoreInsert");
-                            }
-                            if (tagItems.length == 0) {
-                                return "";
-                            }
-                            return ` sq:"${tagItems.join("|")}"`;
-                        },
-                        padGoType: function (item, prefix) {
-                            prefix = prefix || ""
-                            let type = item.goType;
-                            if (type === "custom") {
-                                type = `${prefix}` + item.goTypeCustom || '';
-                            }
-                            if (v.isIDTypeAlias && item.isPrimaryKey) {
-                                type = `${prefix}` + "ID" + vm.model.structName;
-                            }
-                            return type.padEnd(maxGoTypeLength, " ");
-                        },
-                        padGoField: function (item) {
-                            return item.goField.padEnd(maxGoFieldLength, " ");
-                        },
-                        primaryKey: function () {
-                            var target = null;
-                            v.fields.some(function (item) {
-                                if (item.isPrimaryKey) {
-                                    target = item;
-                                    return true;
-                                }
-                            });
-                            return target;
-                        },
-                    },
+                    c: c,
                     v: v,
                 },
                 {delimiter: "#"}
@@ -602,9 +606,14 @@ export default {
         },
         copyCreateFile(type) {
             const vm = this
+            var existCode = `echo -e "\\033[1;33mfail:file exist\\033[0m"`
+            if (type === 'ibase') {
+                existCode = `cat << 'EOF' >> ${vm.fileName(type)}\ncoreDS${vm.modelResult(type, 'onlySignName')}\nEOF
+    echo -e "\\033[1;32msuccess: add code\\033[0m"`
+            }
             var code = `
 if [ -f "${vm.fileName(type)}" ]; then
-    echo -e "\\033[1;33mfail:file exist\\033[0m"
+    ${existCode}
 else
     dir=$(dirname "${vm.fileName(type)}")
     mkdir -p "$dir"
