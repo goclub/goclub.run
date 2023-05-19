@@ -1,15 +1,13 @@
 export default `package m
 // You can change package name
 
-// <#= v.name #> Generate by https://goclub.run/?k=enum
+// <#= v.name #> Generate by https://goclub.run/?k=enum&enumSource=<#- encodeURIComponent(JSON.stringify(v)) #>
 // ---------------------- DO NOT EDIT (Begin) ----------------------
 import (
 	xerr "github.com/goclub/error"
 	"fmt"
 )
 // <#= v.name #>
-// Source enums:
-// <#- JSON.stringify(v) #>
 type <#= v.name #> <#= v.type #>
 // New<#= v.name #> Create <#= v.name #> by <#= v.type #>
 func New<#= v.name #>(v <#= v.type #>)(<#= firstLetterToLowerCase(v.name) #> <#= v.name #>, err error) {

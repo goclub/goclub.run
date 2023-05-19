@@ -6,6 +6,7 @@ import code from "./code.js"
 import * as ejs from "ejs"
 import copy from "copy-to-clipboard"
 import {snakeCase} from "snake-case"
+import qs from "query-string";
 
 function toTitle(s) {
     if (s == "") {
@@ -234,7 +235,7 @@ export default {
         },
     },
     data: function () {
-        return {
+        var out = {
             options: {
                 enumsType: [
                     "[]byte", "string",
@@ -255,5 +256,14 @@ export default {
                 tableStructName: "",
             },
         }
+        var enumSource = qs.parse(location.search).enumSource
+        if (enumSource) {
+            try {
+                out.enums = JSON.parse(decodeURIComponent(enumSource))
+            } catch (e) {
+                console.error(e)
+            }
+        }
+        return out
     }
 }
