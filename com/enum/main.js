@@ -58,6 +58,9 @@ export default {
     components,
     template: tpl,
     computed: {
+        showMatchCode() {
+            return location.href.indexOf("match") !== -1
+        },
         enumsFileName() {
             const vm = this
             return 'enum_' + snakeCase(vm.enums.name) + '.go'
@@ -245,7 +248,7 @@ export default {
                 name: "",
                 type: "uint8",
                 items: [],
-                matchCode: location.href.indexOf('match') != -1,
+                matchCode: false,
             },
             model: {
                 tableName: "",

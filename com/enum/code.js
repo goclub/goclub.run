@@ -103,7 +103,7 @@ func (v <#= v.name #>) Match(
     <#= item.field#> func(_ struct{<#= item.field#> bool}) (err error),
 <# }) -#>
 ) error {
-    e := v.Enum()
+    e := v.Enum<#= v.name #>()
     switch v {
     default:
         return xerr.New(fmt.Sprintf("PlatformKind can not be %s", v))

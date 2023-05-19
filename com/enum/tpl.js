@@ -34,6 +34,11 @@ export default `<div>
         <el-button size="mini" type="primary" @click="markEnumsBySource" >覆盖</el-button>
     </el-form-item>
     </el-form> 
+    <label v-if="showMatchCode">matchCode: 
+    <div style="padding-bottom: 10px;">
+        <el-switch v-model="enums.matchCode"></el-switch>
+    </div>
+    </label>
     <el-button @click="copyCreateFile" type="primary" size="mini" >快速创建</el-button>
     <el-button @click="copyFilename" size="mini" >复制文件名:{{enumsFileName}}</el-button>
     <el-button @click="copyCode" size="mini" >复制代码</el-button>
