@@ -30,8 +30,8 @@
             <el-tab-pane label="GO枚举" name="enum">
                 <spec-enum></spec-enum>
             </el-tab-pane>
-            <el-tab-pane label="UUID" name="uuid">
-                <gen-uuid></gen-uuid>
+            <el-tab-pane label="随机数和ID" name="random">
+                <gen-id></gen-id>
             </el-tab-pane>
         </el-tabs>
         <a class="icp-link" href="https://beian.miit.gov.cn/"
@@ -44,7 +44,7 @@
 import SpecEnum from "./com/enum/main.js";
 import SpecModel from "./com/model/index.vue";
 import GenQrcode from "./com/qrcode/index.vue";
-import GenUUID from "./com/uuid/main.js";
+import GenRandom from "./com/random/main.js";
 import GithubButton from "vue-github-button";
 import qs from "query-string";
 
@@ -55,7 +55,7 @@ const components = {
 components[SpecEnum.name] = SpecEnum;
 components[SpecModel.name] = SpecModel;
 components[GenQrcode.name] = GenQrcode;
-components[GenUUID.name] = GenUUID;
+components[GenRandom.name] = GenRandom;
 export default {
     components: components,
     data() {

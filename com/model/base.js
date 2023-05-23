@@ -1,5 +1,4 @@
-export default `
-package <#- v.interfaceName #>
+export default `package <#- v.interfaceName #>
 func NewDS(
 	config *Conf.Config,
 	log Logger.Logger,

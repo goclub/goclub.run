@@ -126,7 +126,7 @@ export default {
         },
         exampleMarkEnumsBySource() {
             const vm = this
-            vm.source.enums = `{"name":"LogKind","type":"uint8","items":[{"field":"Info","value":"1","tailed":", ","label":"信息"},{"field":"Danger","value":"2","label":"危险"}]}`
+            vm.source.enums = `{"name":"LogKind","type":"uint8","items":[{"field":"Info","value":"1","tailed":", ","label":"信息"},{"field":"Error","value":"2","label":"错误"}]}`
             vm.markEnumsBySource()
         },
         markEnumsBySource() {

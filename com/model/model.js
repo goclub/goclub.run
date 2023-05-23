@@ -2,6 +2,7 @@ export default `// Package m Generate by https://goclub.run/?k=model
 package <#- v.packageName #>
 import (
     sq "github.com/goclub/sql"
+    "strconv"
 )
 
 <# if(c.primaryKey() && v.isIDTypeAlias) {-#>
@@ -15,6 +16,15 @@ func NewID<#- v.structName #>(id <#- c.primaryKey().goType #>) ID<#- v.structNam
 func (id ID<#- v.structName #>) <#= h.toCamel(c.primaryKey().goType) #>() <#- c.primaryKey().goType #> {
     return <#- c.primaryKey().goType #>(id)
 }
+<# if (c.primaryKey().goType.includes("uint")) {-#>
+func (id ID<#- v.structName #>) String() {
+    return strconv.FormatUint(uint64(v), 10)
+}
+<# } else if (c.primaryKey().goType.includes("int")) {-#>
+func (id ID<#- v.structName #>) String() {
+    return strconv.FormatInt(int64(v), 10)
+}
+<# } -#>
 <# } -#>
 // 底层结构体,用于组合出 model
 type Table<#- v.structName #> struct {
@@ -39,7 +49,7 @@ type <#= v.structName #> struct {
     <# if (v.fieldCreateUpdate != "无") { #><#= v.fieldCreateUpdate #><# } #>
     sq.DefaultLifeCycle
 }
-<# if (v.isAutoIncrement){#>
+<# if (c.isAutoIncrement()){#>
 // AfterInsert 创建后自增字段赋值处理
 func (v *<#= v.structName #>) AfterInsert(result sq.Result) (err error) {
     var id uint64 

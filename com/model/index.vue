@@ -1,14 +1,7 @@
+<
 <template>
     <div>
         <el-form label-width="8em" size="mini">
-            <el-form-item label="文档">
-                <el-link type="primary" href="https://goclub.run/sql/" target="_blank"
-                >goclub/sql
-                </el-link>
-            </el-form-item>
-            <el-form-item label="迁移函数名">
-                <el-button @click="copyMigrateName">{{ migrateName }}</el-button>
-            </el-form-item>
             <el-form-item label="示例配置">
                 <el-button-group>
                     <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash">{{
@@ -16,35 +9,45 @@
                         }}
                     </el-button>
                 </el-button-group>
+                &nbsp;<el-link type="primary" href="https://goclub.run/sql/" target="_blank"
+            >goclub/sql
+            </el-link>
             </el-form-item>
-            <el-form-item label="interface">
-                <el-input
-                        style="width: 10em"
-                        placeholder="eg:User"
-                        v-model="model.interfaceName"
-                ></el-input>
-                <span style="opacity: 0.7;padding-left: 0.4em;">I{{ model.interfaceName }}.CreateRequest</span>
-            </el-form-item>
+            <el-divider></el-divider>
             <el-form-item label="name">
-                table:
+                SQL表:
                 <el-input
                         style="width: 12em"
                         @blur="blurTableName"
                         v-model="model.tableName"
                 ></el-input>
-                struct:
+                Model:
                 <el-input
                         style="width: 12em"
                         placeholder="eg:User"
                         v-model="model.structName"
                 ></el-input>
             </el-form-item>
-            <el-form-item label="sign name">
+            <el-form-item label="接口">
+                interface:
+                <el-input
+                        style="width: 10em"
+                        placeholder="eg:Account"
+                        v-model="model.interfaceName"
+                ></el-input>
+                sign:
                 <el-input
                         style="width: 30em"
-                        :placeholder="'非必填,默认值:' + model.structName.replaceAll(model.interfaceName, '')"
+                        :placeholder="'非必填,默认值:' + modelData().c.signName()"
                         v-model="model.signName"
+                        @blur="blurSignName"
                 ></el-input>
+                <br>
+                <span style="opacity: 0.7;padding-left: 0.4em;">I<span style="color:orange">{{
+                    model.interfaceName
+                    }}</span>.Create<span style="color:orange">{{
+                    modelData().c.signName()
+                    }}</span>Request</span>
             </el-form-item>
             <el-form-item label="Source" v-if="q.debug">
                 <el-input type="textarea" :value="JSON.stringify(model,false, '    ')"></el-input>
@@ -154,7 +157,7 @@
                         <td>
                             <el-input
                                     type="textarea"
-                                    style="width: 100px"
+                                    style="width: 50px"
                                     autosize
                                     v-model="row.comment"
                             ></el-input>
@@ -239,6 +242,9 @@ export default {
         }, 0);
     },
     methods: {
+        blurSignName() {
+            this.model.signName = h.toCamel(this.model.signName)
+        },
         useExampleData(key) {
             this.model = JSON.parse(JSON.stringify(this.exampleDataHash[key]))
         },
@@ -274,25 +280,7 @@ export default {
                     break;
             }
         },
-        modelResult(type, kind) {
-            var tpl = "";
-            switch (type) {
-                case "model":
-                    tpl = model;
-                    break;
-                case 'ibase':
-                    tpl = ibase;
-                    break
-                case 'base':
-                    tpl = base;
-                    break
-                case "ds":
-                    tpl = ds;
-                    break;
-                case "ids":
-                    tpl = ids;
-                    break;
-            }
+        modelData(kind) {
             const vm = this;
             const v = vm.model;
             let maxGoFieldLength = 0;
@@ -308,6 +296,18 @@ export default {
             maxGoFieldLength++;
             maxGoTypeLength++;
             var c = {
+                isAutoIncrement() {
+                    if (v.isAutoIncrement) {
+                        return v.fields.some(function (item) {
+                            console.log(item.goType)
+                            if (item.isPrimaryKey && item.goType.includes("int")) {
+                                return true
+                            }
+                            return false
+                        })
+                    }
+                    return false
+                },
                 SQIFCode(item) {
                     console.log(item.goType)
                     switch (item.goType) {
@@ -424,7 +424,6 @@ export default {
                     }
                     return d
                 },
-
                 // 要创建的字段
                 createFields: function () {
                     return v.fields.filter(function (v) {
@@ -543,13 +542,36 @@ export default {
             if (kind === "onlySignName") {
                 return c.signName()
             }
+            var data = {
+                h: h,
+                c: c,
+                v: v,
+            }
+            return data
+        },
+        modelResult(type, kind) {
+            var tpl = "";
+            switch (type) {
+                case "model":
+                    tpl = model;
+                    break;
+                case 'ibase':
+                    tpl = ibase;
+                    break
+                case 'base':
+                    tpl = base;
+                    break
+                case "ds":
+                    tpl = ds;
+                    break;
+                case "ids":
+                    tpl = ids;
+                    break;
+            }
+            var data = this.modelData(kind)
             return ejs.render(
                 tpl,
-                {
-                    h: h,
-                    c: c,
-                    v: v,
-                },
+                data,
                 {delimiter: "#"}
             );
         },
@@ -572,10 +594,10 @@ export default {
         },
         label(value) {
             var hash = {
-                custom: "自定义",
                 "sq.SoftDeleteTime": "delete_time` IS NULL",
                 "sq.SoftDeletedAt": "deleted_at` IS NULL",
                 "sq.SoftIsDeleted": "is_deleted` = 0",
+                custom: "自定义",
                 "sq.WithoutSoftDelete": "无",
                 "sq.CreateTimeUpdateTime": "create_time update_time",
                 "sq.CreatedAtUpdatedAt": "created_at updated_at",
@@ -608,7 +630,7 @@ export default {
             const vm = this
             var existCode = `echo -e "\\033[1;33mfail:file exist\\033[0m"`
             if (type === 'ibase') {
-                existCode = `sed -i '' '/type DS interface {/a\\'$'\\n''coreDS${vm.modelResult(type, 'onlySignName')}\n' ${vm.fileName(type)}
+                existCode = `sed -i '' '/type DS interface {/a\\'$'\\n\''coreDS${vm.modelResult(type, 'onlySignName')}\n' ${vm.fileName(type)}
     echo -e "\\033[1;32msuccess: add code\\033[0m"`
             }
             var code = `
@@ -648,6 +670,9 @@ fi
         blurTableName() {
             const vm = this;
             vm.model.structName = h.toCamel(vm.model.tableName);
+            if (!vm.model.interfaceName) {
+                vm.model.interfaceName = h.toCamel(vm.model.tableName.replace(/_.*$/, ''))
+            }
         },
         addNewField() {
             const vm = this;
@@ -662,7 +687,11 @@ fi
             const vm = this;
             let item = vm.model.fields[index];
             if (item.goType == "custom") {
-                if (item.goTypeCustom == "") {
+                if (!item.goTypeCustom) {
+                    if (item.column.endsWith('id')) {
+                        item.goTypeCustom = "ID" + h.toCamel(item.column.replace(/(_)?id$/, ''))
+                        return
+                    }
                     item.goTypeCustom = vm.model.structName + item.goField
                 }
             }
@@ -707,11 +736,11 @@ fi
             migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm") + "_",
             options: {
                 softDelete: [
-                    "custom",
-                    "sq.SoftDeletedAt",
                     "sq.SoftDeleteTime",
+                    "sq.SoftDeletedAt",
                     "sq.SoftIsDeleted",
                     "sq.WithoutSoftDelete",
+                    "custom",
                 ],
                 fieldType: [
                     "string",
@@ -771,3 +800,4 @@ fi
 }
 
 </style>
+>

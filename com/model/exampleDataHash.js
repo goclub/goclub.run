@@ -16,7 +16,7 @@ export default {
             {
                 "isPrimaryKey": true,
                 "column": "id",
-                "goType": "string",
+                "goType": "uint64",
                 "goField": "ID",
                 "isCreate": false,
                 "isUpdate": false,

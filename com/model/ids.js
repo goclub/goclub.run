@@ -1,5 +1,4 @@
-export default `
-package I<#- v.interfaceName #>
+export default `package I<#- v.interfaceName #>
 
 import vd "github.com/goclub/validator"
 

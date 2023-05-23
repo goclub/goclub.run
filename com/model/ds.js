@@ -1,8 +1,8 @@
-export default `
-package <#- v.interfaceName #>
+export default `package <#- v.interfaceName #>
 
 import sl "github.com/goclub/slice"
 import sq "github.com/goclub/sql"
+import xerr "github.com/goclub/error"
 
 func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Create<#- c.signName()#>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error){
 	<#- h.firstLow(v.structName) #> = m.<#- v.structName #>{

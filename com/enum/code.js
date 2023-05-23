@@ -1,7 +1,7 @@
 export default `package m
 // You can change package name
 
-// <#= v.name #> Generate by https://goclub.run/?k=enum&enumSource=<#- encodeURIComponent(JSON.stringify(v)) #>
+// <#= v.name #> Edit: https://goclub.run/?k=enum&enumSource=<#- encodeURIComponent(JSON.stringify(v)) #>
 // ---------------------- DO NOT EDIT (Begin) ----------------------
 import (
 	xerr "github.com/goclub/error"

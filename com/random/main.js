@@ -2,41 +2,41 @@ import tpl from "./tpl.js"
 
 import copy from "copy-to-clipboard"
 import {v4 as uuidv4} from "uuid"
-const components = {
 
-}
+import {nanoid} from "nanoid"
+
+const components = {}
 export default {
-    name: 'gen-uuid',
+    name: 'gen-id',
     components,
     template: tpl,
-    computed:{
+    computed: {
         shortUUID() {
             return this.UUID.replaceAll("-", "")
         }
     },
     methods: {
-        copyUUID() {
+        changeNanoidLength() {
+            this.nanoid = nanoid(this.nanoidLength)
+        },
+        copy(key) {
             const vm = this
-            copy(vm.UUID)
+            copy(vm[key])
             vm.$message({
-                message: 'uuid已复制到粘贴板',
+                message: key + '已复制到粘贴板',
                 type: "success",
             });
         },
-        copyShortUUID() {
-            const vm = this
-            copy(vm.shortUUID)
-            vm.$message({
-                message: 'short uuid已复制到粘贴板',
-                type: "success",
-            });
-        },
-        refreshUUID() {
+        refresh() {
             this.UUID = uuidv4()
+            this.nanoid = nanoid(this.nanoidLength)
         },
     },
     data: function () {
+        var nanoidLength = 21
         return {
+            nanoidLength: nanoidLength,
+            nanoid: nanoid(nanoidLength),
             UUID: uuidv4(),
         }
     }
