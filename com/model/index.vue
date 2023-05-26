@@ -80,16 +80,6 @@
                     />
                 </div>
             </el-form-item>
-            <el-form-item label="创建/更新时间">
-                <el-select v-model="model.fieldCreateUpdate" style="width: 15em">
-                    <el-option
-                            v-for="item in options.fieldCreateUpdate"
-                            :key="item"
-                            :label="label(item)"
-                            :value="item"
-                    ></el-option>
-                </el-select>
-            </el-form-item>
             <el-form-item label="主键配置">
                 递增:
                 <el-switch v-model="model.isAutoIncrement"></el-switch>
@@ -97,102 +87,128 @@
                 <el-switch v-model="model.isIDTypeAlias"></el-switch>
             </el-form-item>
             <el-form-item label="字段">
-                <table style="width: 100%">
-                    <thead>
-                    <tr>
-                        <th>主键</th>
-                        <th>创建</th>
-                        <th>更新</th>
-                        <th>分页Req</th>
-                        <th>分页Reply</th>
-                        <th>SQL column</th>
-                        <th>Go Type</th>
-                        <th>Go Field</th>
-                        <th>注释</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tr v-for="(row, index) in model.fields">
-                        <td>
-                            <el-switch v-model="row.isPrimaryKey"></el-switch>
-                        </td>
-                        <td>
-                            <el-switch v-model="row.isCreate"></el-switch>
-                        </td>
-                        <td>
-                            <el-switch v-model="row.isUpdate"></el-switch>
-                        </td>
-                        <td>
-                            <el-switch v-model="row.pagingReq"></el-switch>
-                        </td>
-                        <td>
-                            <el-switch v-model="row.pagingReply"></el-switch>
-                        </td>
-                        <td>
-                            <el-input
-                                    v-model="row.column"
-                                    @blur="blurColumnItem(index)"
-                            ></el-input>
-                        </td>
-                        <td>
-                            <el-select v-model="row.goType" filterable style="width: 10em"
-                                       @change="changeGoType(index)">
-                                <el-option
-                                        v-for="item in options.fieldType"
-                                        :key="item"
-                                        :label="label(item)"
-                                        :value="item"
-                                ></el-option>
-                            </el-select>
-                            <el-input
-                                    v-if="row.goType == 'custom'"
-                                    style="width: 12em"
-                                    placeholder="eg:PlatformKind"
-                                    v-model="row.goTypeCustom"
-                            ></el-input>
-                        </td>
-                        <td>
-                            <el-input v-model="row.goField"></el-input>
-                        </td>
-                        <td>
-                            <el-input
-                                    type="textarea"
-                                    style="width: 50px"
-                                    autosize
-                                    v-model="row.comment"
-                            ></el-input>
-                        </td>
-                        <td>
-                            <el-button
-                                    @click="removeFieldsItem(index)"
-                                    size="mini"
-                                    type="danger"
-                                    icon="el-icon-remove"
-                            ></el-button>
+                <div class="fields">
+                    <table style="width: 100%">
+                        <thead>
+                        <tr>
+                            <th style="width: 40px">主键</th>
+                            <th style="width: 40px">创建</th>
+                            <th style="width: 40px">更新</th>
+                            <th style="width: 40px">请求</th>
+                            <th style="width: 40px">响应</th>
+                            <th style="width: 150px">Table Field</th>
+                            <th style="width: 150px">Go Type</th>
+                            <th style="width: 100px">Go Field</th>
+                            <th style="width: 100px">Label</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tr v-for="(row, index) in model.fields">
+                            <td>
+                                <el-switch size="mini" v-model="row.isPrimaryKey"></el-switch>
+                            </td>
+                            <td>
+                                <el-switch size="mini" v-model="row.isCreate"></el-switch>
+                            </td>
+                            <td>
+                                <el-switch size="mini" v-model="row.isUpdate"></el-switch>
+                            </td>
+                            <td>
+                                <el-switch size="mini" v-model="row.pagingReq"></el-switch>
+                            </td>
+                            <td>
+                                <el-switch size="mini" v-model="row.pagingReply"></el-switch>
+                            </td>
+                            <td>
+                                <el-input
+                                        size="mini"
+                                        v-model="row.column"
+                                        @blur="blurColumnItem(index)"
+                                ></el-input>
+                            </td>
+                            <td>
+                                <el-select size="mini"
+                                           v-if="row.goType !== 'custom'"
+                                           v-model="row.goType" filterable style="width: 120px;display: inline-block;"
+                                           @change="changeGoType(index)">
+                                    <el-option
+                                            v-for="item in options.fieldType"
+                                            :key="item"
+                                            :label="label(item)"
+                                            :value="item"
+                                    ></el-option>
+                                </el-select>
+                                <el-input
+                                        style="width:120px;display: inline-block;"
+                                        size="mini"
+                                        v-if="row.goType == 'custom'"
+                                        placeholder="eg:PlatformKind"
+                                        v-model="row.goTypeCustom"
+                                ></el-input>
+                                <el-button @click="row.goType = 'string'" v-if="row.goType == 'custom'" size="mini"
+                                           icon="el-icon-remove-outline" circle></el-button>
+                            </td>
+                            <td>
+                                <el-input size="mini" v-model="row.goField"></el-input>
+                            </td>
+                            <td>
+                                <el-input
+                                        size="mini"
+                                        v-model="row.label"
+                                ></el-input>
+                            </td>
+                            <td>
+                                <el-button
+                                        @click="removeFieldsItem(index)"
+                                        size="mini"
+                                        type="danger"
+                                        icon="el-icon-remove"
+                                ></el-button>
 
-                            <el-button icon="el-icon-arrow-up" size="mini"
-                                       @click="swapIndex($event, index, 'up')"></el-button>
-                            <el-button icon="el-icon-arrow-down" size="mini"
-                                       @click="swapIndex($event, index, 'down')"></el-button>
-                        </td>
-                    </tr>
-                </table>
-
-                <el-button @click="addNewField" type="primary" icon="el-icon-plus"
-                >添加字段
-                </el-button>
+                                <el-button icon="el-icon-arrow-up" size="mini"
+                                           @click="swapIndex($event, index, 'up')"></el-button>
+                                <el-button icon="el-icon-arrow-down" size="mini"
+                                           @click="swapIndex($event, index, 'down')"></el-button>
+                            </td>
+                        </tr>
+                    </table>
+                    <div>
+                        创建/更新时间:
+                        <el-select v-model="model.fieldCreateUpdate" style="width: 15em">
+                            <el-option
+                                    v-for="item in options.fieldCreateUpdate"
+                                    :key="item"
+                                    :label="label(item)"
+                                    :value="item"
+                            ></el-option>
+                        </el-select>
+                    </div>
+                    <el-button @click="addNewField" type="primary" icon="el-icon-plus"
+                    >添加字段
+                    </el-button>
+                </div>
             </el-form-item>
         </el-form>
-        <el-button @click="copyAllCreateFile" type="primary" size="mini">快速创建所有文件</el-button>
-        <el-tabs v-model="codeTypeTab">
-            <el-tab-pane v-for="type in codeType" :key="type"
-                         :label="fileName(type)" :name="type">
-                <el-button @click="copyCreateFile(type)" type="primary" size="mini">快速创建</el-button>
-                <el-button @click="copyFilename(type)" size="mini">复制文件名</el-button>
-                <el-button @click="copyCode(type)" size="mini">复制代码</el-button>
-                <pre class="language-go" v-html="modelResultCode(type)"></pre>
-            </el-tab-pane>
-        </el-tabs>
+        文件:
+        <el-row>
+            <el-col :span="4">
+                <el-button @click="copyAllCreateFile" type="primary" size="mini">快速创建所有文件</el-button>
+                <div class="fileList">
+                    <el-tree
+                            :data="fileList()"
+                            :expand-on-click-node="false"
+                            :default-expand-all="true"
+                            @node-click="clickTreeCode"
+                    ></el-tree>
+                </div>
+            </el-col>
+            <el-col :span="20">
+                <el-button @click="copyCreateFile(codeTypeTab)" type="primary" size="mini">快速创建</el-button>
+                <el-button @click="copyFilename(codeTypeTab)" size="mini">复制文件名</el-button>
+                <el-button @click="copyCode(codeTypeTab)" size="mini">复制代码</el-button>
+                <pre class="language-go" v-html="modelResultCode(codeTypeTab)"></pre>
+            </el-col>
+        </el-row>
     </div>
 </template>
 <script>
@@ -207,6 +223,7 @@ import * as ejs from "ejs";
 import {snakeCase} from "snake-case";
 import copy from "copy-to-clipboard";
 import dayjs from "dayjs";
+import formatFilesWithHierarchy from "./formatfilelist"
 import hljs from "highlight.js";
 import "highlight.js/lib/languages/go.js";
 import "highlight.js/styles/base16/solarized-light.css";
@@ -244,6 +261,19 @@ export default {
         }, 0);
     },
     methods: {
+        clickTreeCode: function (node) {
+            if (node.children) {
+                return
+            }
+            this.codeTypeTab = node.value
+            return true
+        },
+        fileList: function () {
+            const vm = this
+            return formatFilesWithHierarchy(vm.codeType.map(function (item) {
+                return vm.fileName(item)
+            }))
+        },
         blurSignName() {
             this.model.signName = h.toCamel(this.model.signName)
         },
@@ -622,13 +652,14 @@ export default {
         fileName(type) {
             const vm = this;
             var name = snakeCase(vm.model.tableName)
+            var dir = `${h.firstLow(vm.model.interfaceName)}`
             var hash = {
-                'ibase': 'interface/ds.go',
-                'base': 'ds.go',
-                "model": "../1model/sql_" + name + ".go",
-                "ds": "ds_" + name + ".go",
-                "ids": "interface/ds_" + name + ".go",
-                'paging.html': "../../tpl/admin/" + name + ".html"
+                'ibase': `internal/${dir}/interface/ds.go`,
+                'base': `internal/${dir}/ds.go`,
+                "model": "internal/1model/sql_" + name + ".go",
+                "ds": `internal/${dir}/ds_${name}.go`,
+                "ids": `internal/${dir}/interface/ds_${name}.go`,
+                'paging.html': `tpl/admin/${name}.html`
             }
             return hash[type]
         },
@@ -668,7 +699,7 @@ fi
             }
             copy(code)
             vm.$message({
-                message: '命令已到粘贴板,请打开终端/命令行进入 internal/{模块} 目录下执行',
+                message: '命令已到粘贴板,请打开终端/命令行进入项目目录下执行',
                 type: "success",
             });
         },
@@ -827,5 +858,13 @@ fi
     tab-size: 2;
 }
 
+.fields {
+    margin-bottom: 10px;
+    font-size: 0.8em
+}
+
+.fileList {
+    padding: 1em;
+
+}
 </style>
->

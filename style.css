@@ -5,13 +5,13 @@
     color: #2c3e50;
     background: white;
     min-height: 100vh;
-    padding: 2em;
-    padding-top: 1em;
+    padding: 1em;
+    padding-top: 1px;
     border-radius: 0.4em;
 }
 
 body {
-    padding: 2em;
+    padding: 1em;
     background: url(https://picsum.photos/seed/some/3840/2160?blur=2) repeat-y;
 }
 

@@ -28,6 +28,10 @@ export default `[[extends "./layout/pc.html"]]
                 <el-input-number  v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" :precision="2"></el-input-number>
 <# } else if(item.goType.indexOf('bool') != -1) { -#>
                 <el-switch v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" ></el-switch>
+<# } else if(item.goType.indexOf('.Time') != -1) { -#>
+                <el-time-picker v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" ></el-time-picker>
+<# } else if(item.goType.indexOf('xtime.Date') != -1) { -#>
+                <el-date-picker v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" ></el-date-picker>
 <# } else{ -#>
                 <el-input v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>"></el-input>
 <# } -#>
