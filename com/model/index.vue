@@ -183,6 +183,7 @@
                 </el-button>
             </el-form-item>
         </el-form>
+        <el-button @click="copyAllCreateFile" type="primary" size="mini">快速创建所有文件</el-button>
         <el-tabs v-model="codeTypeTab">
             <el-tab-pane v-for="type in codeType" :key="type"
                          :label="fileName(type)" :name="type">
@@ -196,11 +197,12 @@
 </template>
 <script>
 import exampleDataHash from "./exampleDataHash.js";
-import model from "./model.js";
-import ds from "./ds.js";
-import ids from "./ids.js";
-import base from "./base.js";
-import ibase from "./ibase.js";
+import model from "./code/model.js";
+import ds from "./code/ds.js";
+import ids from "./code/ids.js";
+import base from "./code/base.js";
+import ibase from "./code/ibase.js";
+import pagingHTML from "./code/paging_html.js"
 import * as ejs from "ejs";
 import {snakeCase} from "snake-case";
 import copy from "copy-to-clipboard";
@@ -299,7 +301,6 @@ export default {
                 isAutoIncrement() {
                     if (v.isAutoIncrement) {
                         return v.fields.some(function (item) {
-                            console.log(item.goType)
                             if (item.isPrimaryKey && item.goType.includes("int")) {
                                 return true
                             }
@@ -309,7 +310,6 @@ export default {
                     return false
                 },
                 SQIFCode(item) {
-                    console.log(item.goType)
                     switch (item.goType) {
                         case "string":
                             return `${item.goField} != ""`
@@ -421,6 +421,8 @@ export default {
                     }
                     if (v.structName !== v.interfaceName) {
                         return v.structName.replaceAll(v.interfaceName, '')
+                    } else {
+                        return v.structName
                     }
                     return d
                 },
@@ -539,13 +541,13 @@ export default {
                     return target;
                 },
             }
-            if (kind === "onlySignName") {
-                return c.signName()
-            }
             var data = {
                 h: h,
                 c: c,
                 v: v,
+            }
+            if (kind === "onlySignName") {
+                return c.signName()
             }
             return data
         },
@@ -566,6 +568,9 @@ export default {
                     break;
                 case "ids":
                     tpl = ids;
+                    break;
+                case 'paging.html':
+                    tpl = pagingHTML
                     break;
             }
             var data = this.modelData(kind)
@@ -623,14 +628,27 @@ export default {
                 "model": "../1model/sql_" + name + ".go",
                 "ds": "ds_" + name + ".go",
                 "ids": "interface/ds_" + name + ".go",
+                'paging.html': "../../tpl/admin/" + name + ".html"
             }
             return hash[type]
         },
-        copyCreateFile(type) {
+        copyAllCreateFile() {
+            const vm = this
+            var code = ""
+            vm.codeType.forEach(function (type) {
+                code += vm.copyCreateFile(type, "returnCode")
+            })
+            copy(code)
+            vm.$message({
+                message: '命令已到粘贴板,请打开终端/命令行进入 internal/{模块} 目录下执行',
+                type: "success",
+            });
+        },
+        copyCreateFile(type, cmd) {
             const vm = this
             var existCode = `echo -e "\\033[1;33mfail:file exist\\033[0m"`
             if (type === 'ibase') {
-                existCode = `sed -i '' '/type DS interface {/a\\'$'\\n\''coreDS${vm.modelResult(type, 'onlySignName')}\n' ${vm.fileName(type)}
+                existCode = `sed -i '' '/type DS interface {/a\\'$'\\n\''coreDS${vm.modelData(type, 'onlySignName')}\n' ${vm.fileName(type)}
     echo -e "\\033[1;32msuccess: add code\\033[0m"`
             }
             var code = `
@@ -645,6 +663,9 @@ else
     fi
 fi
             `
+            if (cmd == "returnCode") {
+                return code
+            }
             copy(code)
             vm.$message({
                 message: '命令已到粘贴板,请打开终端/命令行进入 internal/{模块} 目录下执行',
@@ -784,8 +805,15 @@ fi
                 },
             },
             model: model,
-            codeType: ['model', 'ibase', 'ids', 'base', 'ds'],
-            codeTypeTab: 'model',
+            codeType: [
+                'model',
+                'ibase',
+                'ids',
+                'base',
+                'ds',
+                'paging.html',
+            ],
+            codeTypeTab: 'paging.html',
         };
     },
 };
