@@ -43,6 +43,5 @@ function convertToTreeData(obj, path = '') {
 
 export default function (a) {
     var o = convertToTreeData(formatFilesWithHierarchy(a))
-    console.log(o)
     return o
 }

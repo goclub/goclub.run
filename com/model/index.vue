@@ -189,26 +189,57 @@
                 </div>
             </el-form-item>
         </el-form>
-        文件:
         <el-row>
             <el-col :span="4">
-                <el-button @click="copyAllCreateFile" type="primary" size="mini">快速创建所有文件</el-button>
-                <div class="fileList">
-                    <el-tree
-                            :data="fileList()"
-                            :expand-on-click-node="false"
-                            :default-expand-all="true"
-                            @node-click="clickTreeCode"
-                    ></el-tree>
-                </div>
+
             </el-col>
             <el-col :span="20">
-                <el-button @click="copyCreateFile(codeTypeTab)" type="primary" size="mini">快速创建</el-button>
-                <el-button @click="copyFilename(codeTypeTab)" size="mini">复制文件名</el-button>
-                <el-button @click="copyCode(codeTypeTab)" size="mini">复制代码</el-button>
-                <pre class="language-go" v-html="modelResultCode(codeTypeTab)"></pre>
             </el-col>
         </el-row>
+        <div class="codeWindow">
+            <div class="codeWindowHead"></div>
+            <el-row>
+                <el-col :span="4">
+                    <el-button @click="copyAllCreateFile" style="width: 100%;border-radius: 0;" type="primary"
+                               size="mini">
+                        快速创建所有文件
+                    </el-button>
+                    <div class="fileList">
+                        <el-tree
+                                :data="fileList()"
+                                :expand-on-click-node="false"
+                                :default-expand-all="true"
+                        >
+                                  <span slot-scope="{ node, data }">
+                                      <span v-if="data.children">{{ data.label }}</span>
+                                      <el-link type="primary"
+                                               v-else-if="data.key == fileName(codeTypeTab)">{{ data.label }}</el-link>
+                                     <el-link @click="codeTypeTab = mapFileCode(data.value)" v-else
+                                     >{{
+                                         data.label
+                                         }}</el-link>
+                                  </span>
+                        </el-tree>
+                        模型:
+                        <el-input size="mini" :placeholder="defaultTableDir()" v-model="model.tableDir"></el-input>
+                        模块:
+                        <el-input size="mini" :placeholder="defaultModuleDir()" v-model="model.moduleDir"></el-input>
+                        模版:
+                        <el-input size="mini" :placeholder="defaultTplDir()" v-model="model.tplDir"></el-input>
+                    </div>
+                </el-col>
+                <el-col :span="20">
+                    <div class="codeWindowFilename">{{ fileName(codeTypeTab) }}</div>
+                    <el-button-group>
+                        <el-button @click="copyCreateFile(codeTypeTab)" type="primary" size="mini">快速创建当前文件
+                        </el-button>
+                        <el-button @click="copyFilename(codeTypeTab)" size="mini">复制文件名</el-button>
+                        <el-button @click="copyCode(codeTypeTab)" size="mini">复制代码</el-button>
+                    </el-button-group>
+                    <pre class="language-go" v-html="modelResultCode(codeTypeTab)"></pre>
+                </el-col>
+            </el-row>
+        </div>
     </div>
 </template>
 <script>
@@ -239,6 +270,10 @@ const defaultModel = function () {
         tableName: "",
         structName: "",
         signName: "",
+        interfaceName: "",
+        tableDir: "",
+        moduleDir: "",
+        tplDir: "",
         softDelete: "",
         customSoftDelete: {
             SoftDeleteWhere: ``,
@@ -261,12 +296,21 @@ export default {
         }, 0);
     },
     methods: {
-        clickTreeCode: function (node) {
+        clickTreeCode: function (node, e) {
             if (node.children) {
                 return
             }
-            this.codeTypeTab = node.value
-            return true
+            this.codeTypeTab = this.mapFileCode(node.value)
+            this.treeKey = node.key
+            return
+        },
+        mapFileCode: function (k) {
+            const vm = this
+            var map = {}
+            vm.codeType.some(function (type) {
+                map[vm.fileName(type)] = type
+            })
+            return map[k]
         },
         fileList: function () {
             const vm = this
@@ -649,17 +693,30 @@ export default {
                 return index != removeIndex;
             });
         },
+        defaultTableDir() {
+            return "1model"
+        },
+        defaultModuleDir() {
+            const vm = this;
+            return `${h.firstLow(vm.model.interfaceName)}`
+        },
+        defaultTplDir() {
+            const vm = this;
+            return `tpl`
+        },
         fileName(type) {
             const vm = this;
             var name = snakeCase(vm.model.tableName)
-            var dir = `${h.firstLow(vm.model.interfaceName)}`
+            var tableDir = vm.model.tableDir || vm.defaultTableDir()
+            var moduleDir = vm.model.moduleDir || vm.defaultModuleDir()
+            var tplDir = vm.model.tplDir || vm.defaultTplDir()
             var hash = {
-                'ibase': `internal/${dir}/interface/ds.go`,
-                'base': `internal/${dir}/ds.go`,
-                "model": "internal/1model/sql_" + name + ".go",
-                "ds": `internal/${dir}/ds_${name}.go`,
-                "ids": `internal/${dir}/interface/ds_${name}.go`,
-                'paging.html': `tpl/admin/${name}.html`
+                'ibase': `internal/${moduleDir}/interface/ds.go`,
+                'base': `internal/${moduleDir}/ds.go`,
+                "model": `internal/${tableDir}/sql_` + name + ".go",
+                "ds": `internal/${moduleDir}/ds_${name}.go`,
+                "ids": `internal/${moduleDir}/interface/ds_${name}.go`,
+                'paging.html': `${tplDir}/admin/${name}.html`
             }
             return hash[type]
         },
@@ -671,7 +728,7 @@ export default {
             })
             copy(code)
             vm.$message({
-                message: '命令已到粘贴板,请打开终端/命令行进入 internal/{模块} 目录下执行',
+                message: '所有创建命令已到粘贴板,请打开终端/命令行进入项目根目录执行',
                 type: "success",
             });
         },
@@ -699,7 +756,7 @@ fi
             }
             copy(code)
             vm.$message({
-                message: '命令已到粘贴板,请打开终端/命令行进入项目目录下执行',
+                message: '命令已到粘贴板,请打开终端/命令行进入项目目录执行',
                 type: "success",
             });
         },
@@ -774,14 +831,15 @@ fi
     },
     data: function () {
         let model = defaultModel();
-        const moelData = localStorage.getItem(MODEL_KEY);
-        if (moelData) {
+        const modelData = localStorage.getItem(MODEL_KEY);
+        if (modelData) {
             try {
-                model = JSON.parse(moelData);
+                model = JSON.parse(modelData);
             } catch (err) {
                 console.log(err);
             }
         }
+        var codeTypeTab = 'model'
         return {
             q: querystring.parse(location.search.slice(1)),
             exampleDataHash: exampleDataHash,
@@ -844,7 +902,7 @@ fi
                 'ds',
                 'paging.html',
             ],
-            codeTypeTab: 'paging.html',
+            codeTypeTab: codeTypeTab,
         };
     },
 };
@@ -855,7 +913,10 @@ fi
     overflow: auto;
     background: #fdf6e3;
     border-radius: 0.3em;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
     tab-size: 2;
+    margin-bottom: 0;
 }
 
 .fields {
@@ -865,6 +926,54 @@ fi
 
 .fileList {
     padding: 1em;
+    padding-top: 0;
+    font-size: 12px;
+}
 
+
+.codeWindow {
+    margin-top: .5em;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .1);
+    padding-top: 30px;
+    position: relative;
+    border: 1px solid #d0d7de;
+
+    .language-go {
+        margin-top: 0;
+        padding: 1em;
+    }
+}
+
+.codeWindowHead {
+    border-bottom: 1px solid rgba(225, 225, 225, 0.98);
+}
+
+.codeWindowHead::before {
+    background: #fc625d;
+    border-radius: 50%;
+    box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
+    content: ' ';
+    height: 12px;
+    margin-top: -20px;
+    position: absolute;
+    width: 12px;
+    left: 10px;
+}
+
+.codeWindow .el-tree {
+    background: transparent;
+}
+
+.codeWindowFilename {
+    display: inline-block;
+    border-bottom: 1px solid #faf6f1;
+    border-top-left-radius: 0.3em;
+    border-top-right-radius: 0.3em;
+    user-select: none;
+    padding: 0 10px;
+    font-size: 14px;
+    line-height: 2;
 }
 </style>

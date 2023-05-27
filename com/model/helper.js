@@ -9,8 +9,8 @@ function toCamel(str) {
 }
 
 function firstLow(str) {
-    if (str == "") {
-        return "";
+    if (!str) {
+        return ""
     }
     if (str == "ID") {
         return "id"
