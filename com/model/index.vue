@@ -1,7 +1,10 @@
 <
 <template>
     <div>
-        <el-form label-width="8em" size="mini">
+        <el-form label-width="4em" size="mini">
+            <el-form-item label="SQL">
+                使用表单生成Go代码
+            </el-form-item>
             <el-form-item label="示例">
                 <el-button-group>
                     <el-button @click="setDefaultModel">清空</el-button>
@@ -74,7 +77,7 @@
                     />
                 </div>
             </el-form-item>
-            <el-form-item label="主键配置" v-if="hasPrimaryKey">
+            <el-form-item label="主键" v-if="hasPrimaryKey">
                 递增:
                 <el-switch v-model="model.isAutoIncrement"></el-switch>
                 ID类型别名:
@@ -193,7 +196,7 @@
             </el-col>
         </el-row>
         <div class="codeWindow">
-            <div class="codeWindowHead">根据配置生成的代码</div>
+            <div class="codeWindowHead">模型/接口/实现</div>
             <el-row>
                 <el-col :span="4">
                     <el-button @click="copyAllCreateFile" style="width: 100%;border-radius: 0;" type="text"
