@@ -1,15 +1,14 @@
 <template>
     <div class="main">
-        <h1>
-            <el-link
-                    style="font-size: 1em"
-                    target="_blank"
-                    type="primary"
-                    href="https://github.com/goclub"
-            >goclub.run
-            </el-link
-            >
-        </h1>
+        <el-link
+                style="font-size: 20px;padding-top: .5em;"
+                target="_blank"
+                :underline="false"
+                type="info"
+                href="https://github.com/goclub"
+        >
+            github.com/goclub
+        </el-link>
         <el-tabs v-model="activeTool" @tab-click="changeTag">
             <el-tab-pane label="开源项目" name="repo">
                 <div v-for="item in repos" style="padding: 3px 0">

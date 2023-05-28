@@ -7,9 +7,9 @@ export default `[[extends "./layout/pc.html"]]
         </template>
         <el-form :inline="true">
 <# c.pagingReqFields().forEach(function (item) { -#>
-            <el-form-item label="<#= h.firstLow(h.snakeToCamel(item.column)) #>">
+            <el-form-item label="<#= h.firstLow(c.snakeToCamel(item.column)) #>">
 <# if (item.goType == 'custom') { -#>
-                <el-select v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" placeholder="全部">
+                <el-select v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>" placeholder="全部">
                     <!-- _enum().<#= h.firstLow(item.goField) #> 在 project.js 中配置 -->
                     <el-option 
                 <# if (item.goField.toLowerCase().endsWith('id')) { -#>
@@ -21,19 +21,19 @@ export default `[[extends "./layout/pc.html"]]
                     ></el-option>
                 </el-select>
 <# } else if(item.goType.indexOf('uint') != -1) { -#>
-                <el-input-number :min="0" v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>"></el-input-number>
+                <el-input-number :min="0" v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>"></el-input-number>
 <# } else if(item.goType.indexOf('int') != -1) { -#>
-                <el-input-number v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>"></el-input-number>
+                <el-input-number v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>"></el-input-number>
 <# } else if(item.goType.indexOf('float') != -1) { -#>
-                <el-input-number  v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" :precision="2"></el-input-number>
+                <el-input-number  v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>" :precision="2"></el-input-number>
 <# } else if(item.goType.indexOf('bool') != -1) { -#>
-                <el-switch v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" ></el-switch>
+                <el-switch v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>" ></el-switch>
 <# } else if(item.goType.indexOf('.Time') != -1) { -#>
-                <el-time-picker v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" ></el-time-picker>
+                <el-time-picker v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>" ></el-time-picker>
 <# } else if(item.goType.indexOf('xtime.Date') != -1) { -#>
-                <el-date-picker v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>" ></el-date-picker>
+                <el-date-picker v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>" ></el-date-picker>
 <# } else{ -#>
-                <el-input v-model="search.<#= h.firstLow(h.snakeToCamel(item.column)) #>"></el-input>
+                <el-input v-model="search.<#= h.firstLow(c.snakeToCamel(item.column)) #>"></el-input>
 <# } -#>
             </el-form-item>
 <# }) -#>
@@ -42,7 +42,7 @@ export default `[[extends "./layout/pc.html"]]
         </el-form>
         <el-table :data="list" style="width: 100%">
 <# c.pagingReplyFields().forEach(function (item) { -#>
-            <el-table-column label="<#= h.firstLow(h.snakeToCamel(item.column)) #>" prop="<#= h.firstLow(h.snakeToCamel(item.column)) #>" <#if (h.firstLow(h.snakeToCamel(item.column)) == "id"){ #> width="50" <# } -#> ></el-table-column>
+            <el-table-column label="<#= h.firstLow(c.snakeToCamel(item.column)) #>" prop="<#= h.firstLow(c.snakeToCamel(item.column)) #>" <#if (h.firstLow(c.snakeToCamel(item.column)) == "id"){ #> width="50" <# } -#> ></el-table-column>
 <# }) -#>
             <el-table-column label="操作">
                 <template slot-scope="scope">

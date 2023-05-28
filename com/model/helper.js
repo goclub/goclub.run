@@ -27,14 +27,6 @@ function isUpperCase(str) {
     return str === str.toUpperCase();
 }
 
-function snakeToCamel(str) {
-    var out = toCamel(
-        str.replace(/([-_][a-z])/g, function (group) {
-            return group.toUpperCase().replace("-", "").replace("_", "");
-        })
-    ).replace(/Id$/, "ID");
-    return out;
-}
 
 function indent(n) {
     if (!n) {
@@ -53,7 +45,6 @@ function endSymbol(arr, index, a, b) {
 
 export default {
     toCamel,
-    snakeToCamel,
     firstLow,
     indent,
     endSymbol,

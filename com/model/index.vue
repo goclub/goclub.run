@@ -1,23 +1,20 @@
-<
 <template>
     <div>
-        <el-form label-width="4em" size="mini">
+        <el-form label-width="6em" size="mini">
             <el-form-item label="SQL">
                 使用表单生成Go代码
             </el-form-item>
             <el-form-item label="示例">
                 <el-button-group>
                     <el-button @click="setDefaultModel">清空</el-button>
-                    <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash">{{
+                    <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash" :key="key">{{
                         key
                         }}
                     </el-button>
                 </el-button-group>
-                &nbsp;<el-link type="primary" href="https://goclub.run/sql/" target="_blank"
-            >文档
-            </el-link>
+                &nbsp;<el-link type="primary" href="https://goclub.run/sql/" target="_blank">文档</el-link>
             </el-form-item>
-            <el-form-item label="名称">
+            <el-form-item label="表名">
                 <el-input
                         style="width: 12em"
                         @blur="blurTableName"
@@ -78,21 +75,61 @@
                 </div>
             </el-form-item>
             <el-form-item label="主键" v-if="hasPrimaryKey">
-                递增:
+                递增
                 <el-switch v-model="model.isAutoIncrement"></el-switch>
-                ID类型别名:
+                <span style="padding:0 5px;">type ID{{ model.structName }} {{
+                    modelData().c.primaryKey().goType
+                    }}</span>
                 <el-switch v-model="model.isIDTypeAlias"></el-switch>
+            </el-form-item>
+            <el-form-item label="代码风格">
+                驼峰
+                <el-select @change="changeCodeStyleCamelCaseID" v-model="model.codeStyle.camelCaseID"
+                           style="width:5em;">
+                    <el-option
+                            v-for="item in options.camelCaseID"
+                            :key="item"
+                            :label="item"
+                            :value="item"
+                    ></el-option>
+                </el-select>
             </el-form-item>
             <el-form-item label="字段">
                 <div class="fields">
                     <table style="width: 100%">
                         <thead>
                         <tr>
-                            <th style="width: 40px">主键</th>
-                            <th style="width: 40px">创建</th>
-                            <th style="width: 40px">更新</th>
-                            <th style="width: 40px">请求</th>
-                            <th style="width: 40px">响应</th>
+                            <th style="width: 40px">主键
+
+                            </th>
+                            <th style="width: 40px">
+                                <el-popover placement="top" trigger="hover">
+                                    在 Create 创建请求参数中
+                                    <span slot="reference">创建<i style="color:#909399;"
+                                                                  class="el-icon-question"></i></span>
+                                </el-popover>
+                            </th>
+                            <th style="width: 40px">
+                                <el-popover placement="top" trigger="hover">
+                                    在 Update 更新请求参数中
+                                    <span slot="reference">更新<i style="color:#909399;"
+                                                                  class="el-icon-question"></i></span>
+                                </el-popover>
+                            </th>
+                            <th style="width: 40px">
+                                <el-popover placement="top" trigger="hover">
+                                    在 Paging 分页请求参数中
+                                    <span slot="reference">搜索<i style="color:#909399;"
+                                                                  class="el-icon-question"></i></span>
+                                </el-popover>
+                            </th>
+                            <th style="width: 40px">
+                                <el-popover placement="top" trigger="hover">
+                                    在 Paging 分页响应数据中
+                                    <span slot="reference">响应<i style="color:#909399;"
+                                                                  class="el-icon-question"></i></span>
+                                </el-popover>
+                            </th>
                             <th style="width: 150px">Table Field</th>
                             <th style="width: 150px">Go Type</th>
                             <th style="width: 100px">Go Field</th>
@@ -249,6 +286,7 @@
 </template>
 <script>
 import exampleDataHash from "./exampleDataHash.js";
+import extend from "safe-extend"
 import model from "./code/model.js";
 import ds from "./code/ds.js";
 import ids from "./code/ids.js";
@@ -268,7 +306,7 @@ const components = {};
 import h from "./helper.js";
 import * as querystring from "querystring";
 
-const MODEL_KEY = "goclub.run/model/v3";
+const MODEL_KEY = "goclub.run/model/v4";
 const defaultModel = function () {
     return {
         packageName: "m",
@@ -282,6 +320,9 @@ const defaultModel = function () {
         moduleDir: "",
         tplDir: "",
         softDelete: "sq.WithoutSoftDelete",
+        codeStyle: {
+            camelCaseID: "ID",
+        },
         customSoftDelete: {
             SoftDeleteWhere: ``,
             SoftDeleteSet: ``,
@@ -309,6 +350,12 @@ export default {
         }, 0);
     },
     methods: {
+        changeCodeStyleCamelCaseID: function () {
+            const vm = this
+            vm.model.fields.forEach(function (v, i) {
+                vm.blurColumnItem(i)
+            })
+        },
         addTemplateField: function (cmd) {
             this.model.fields = this.model.fields.concat(this.options.templateField[cmd])
         },
@@ -348,7 +395,7 @@ export default {
             this.model.signName = h.toCamel(this.model.signName)
         },
         useExampleData(key) {
-            this.model = JSON.parse(JSON.stringify(this.exampleDataHash[key]))
+            this.model = extend(true, defaultModel(), JSON.parse(JSON.stringify(this.exampleDataHash[key])))
         },
         // 基于index 和 kind(up down) 调整 vm.model[index]的位置
         swapIndex(event, index, kind) {
@@ -398,6 +445,17 @@ export default {
             maxGoFieldLength++;
             maxGoTypeLength++;
             var c = {
+                snakeToCamel(str) {
+                    var out = h.toCamel(
+                        str.replace(/([-_][a-z])/g, function (group) {
+                            return group.toUpperCase().replace("-", "").replace("_", "");
+                        })
+                    )
+                    if (v.codeStyle.camelCaseID == "ID") {
+                        return out = out.replace(/Id$/, "ID")
+                    }
+                    return out;
+                },
                 isAutoIncrement() {
                     if (v.isAutoIncrement) {
                         return v.fields.some(function (item) {
@@ -834,10 +892,13 @@ fi
             let item = vm.model.fields[index];
             let value = item.column;
             if (value == "id") {
-                value = "ID";
+                if (vm.model.codeStyle.camelCaseID == "ID") {
+                    value = "ID";
+                } else {
+                    value = "Id"
+                }
             }
-            value = value.replace(/_id$/, "ID");
-            value = h.toCamel(value);
+            value = vm.modelData().c.snakeToCamel(value);
             vm.model.fields[index].goField = value;
         },
         blurGoFieldsItem(index) {
@@ -858,7 +919,7 @@ fi
         const modelData = localStorage.getItem(MODEL_KEY);
         if (modelData) {
             try {
-                model = JSON.parse(modelData);
+                model = extend(true, model, JSON.parse(modelData))
             } catch (err) {
                 console.log(err);
             }
@@ -869,6 +930,10 @@ fi
             exampleDataHash: exampleDataHash,
             migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm") + "_",
             options: {
+                camelCaseID: [
+                    "ID",
+                    'Id',
+                ],
                 templateField: {
                     "create_time update_time": [
                         {
@@ -1014,7 +1079,7 @@ fi
 }
 
 .codeWindowHead {
-    padding-left: 80px;
+    padding-left: 17%;
     line-height: 30px;
     font-size: 12px;
     color: #999;

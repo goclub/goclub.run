@@ -606,9 +606,9 @@ electron-to-chromium@^1.4.17:
   version "1.4.57"
   resolved "https://registry.npmmirror.com/electron-to-chromium/-/electron-to-chromium-1.4.57.tgz#2b2766df76ac8dbc0a1d41249bc5684a31849892"
 
-element-ui@2.15.1:
-  version "2.15.1"
-  resolved "https://registry.nlark.com/element-ui/download/element-ui-2.15.1.tgz#ada00aa6e32c02774a2e77563dd84668f813cdff"
+element-ui@2.15.13:
+  version "2.15.13"
+  resolved "https://registry.npmmirror.com/element-ui/-/element-ui-2.15.13.tgz#380f019ee7d15b181105587b41fd5914c308a143"
   dependencies:
     async-validator "~1.8.1"
     babel-helper-vue-jsx-merge-props "^2.0.0"
@@ -774,6 +774,10 @@ express@^4.17.1:
     utils-merge "1.0.1"
     vary "~1.1.2"
 
+extend@3.0.1:
+  version "3.0.1"
+  resolved "https://registry.npmmirror.com/extend/-/extend-3.0.1.tgz#a755ea7bc1adfcc5a31ce7e762dbaadc5e636444"
+
 fast-deep-equal@^3.1.1:
   version "3.1.3"
   resolved "https://registry.npmmirror.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
@@ -843,9 +847,9 @@ gensync@^1.0.0-beta.2:
   version "1.0.0-beta.2"
   resolved "https://registry.npmmirror.com/gensync/-/gensync-1.0.0-beta.2.tgz#32a6ee76c3d7f52d46b2b1ae5d93fea8580a25e0"
 
-github-buttons@^2.8.0:
-  version "2.18.1"
-  resolved "https://registry.nlark.com/github-buttons/download/github-buttons-2.18.1.tgz#93737ca38dd6a108799ebbbce7bafc46eb80c535"
+github-buttons@^2.22.0:
+  version "2.27.0"
+  resolved "https://registry.npmmirror.com/github-buttons/-/github-buttons-2.27.0.tgz#bbebea3d1c4f8c302b7d8432fd25a679242597e2"
 
 globals@^11.1.0:
   version "11.12.0"
@@ -1268,6 +1272,12 @@ safe-buffer@5.1.2, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.nlark.com/safe-buffer/download/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
 
+safe-extend@^3.0.6:
+  version "3.0.6"
+  resolved "https://registry.npmmirror.com/safe-extend/-/safe-extend-3.0.6.tgz#e6d16f71dd060c6501f19781c136fd2179d015dd"
+  dependencies:
+    extend "3.0.1"
+
 "safer-buffer@>= 2.1.2 < 3":
   version "2.1.2"
   resolved "https://registry.nlark.com/safer-buffer/download/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
@@ -1467,11 +1477,11 @@ vite@2.7.2:
   optionalDependencies:
     fsevents "~2.3.2"
 
-vue-github-button@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npm.taobao.org/vue-github-button/download/vue-github-button-1.3.0.tgz#a4da317a3b93d05824768b3916a0d22fa91603be"
+vue-github-button@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.npmmirror.com/vue-github-button/-/vue-github-button-3.1.0.tgz#a95751c43db68cb3ba790af1f63df7e3a2be6dae"
   dependencies:
-    github-buttons "^2.8.0"
+    github-buttons "^2.22.0"
 
 vue-template-compiler@^2.6.14:
   version "2.6.14"

@@ -11,8 +11,8 @@
 }
 
 body {
-    padding: 1em;
-    background: url(https://picsum.photos/seed/some/3840/2160?blur=2) repeat-y;
+    padding: 2em;
+    background-image: linear-gradient(to top, #6991c7 0%, #a3bded 100%);
 }
 
 .icp-link {

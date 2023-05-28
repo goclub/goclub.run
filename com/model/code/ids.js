@@ -20,6 +20,7 @@ type coreDS<#- c.signName()#> interface {
 	// Have<#- c.signName()#> 存在(多) 入参主键的数量与数据库中数据的数量相等则返回 true
 	Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have bool, err error)
 <# if (c.needPaging()) { -#>	// Paging<#- c.signName()#> 分页
+  // 注意: 此接口目前只给管理后台使用,提供给其他角色使用需要入参加上角色对应的ID.例如 accountID, userID
 	Paging<#- c.signName()#>(ctx context.Context, req Paging<#- c.signName()#>Request) (reply Paging<#- c.signName()#>Reply, err error)
 <# } -#>
 }
@@ -36,7 +37,7 @@ type Paging<#- c.signName()#>Reply struct {
 }
 type Paging<#- c.signName()#>ReplyItem struct {
 <# c.pagingReplyFields().forEach(function (item) { -#>
-    <#= c.padGoField(item) #> <#= c.padGoType(item, "m.") #>  \`json:"<#= h.firstLow(h.snakeToCamel(item.column)) #>"\`
+    <#= c.padGoField(item) #> <#= c.padGoType(item, "m.") #>  \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>
 }
 <# } -#>
