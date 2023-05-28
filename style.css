@@ -13,7 +13,9 @@
 body {
     padding: 2em;
     background-image: linear-gradient(to top, #6991c7 0%, #a3bded 100%);
+    min-height: 100vh;
 }
+
 
 .icp-link {
     margin-left: auto;

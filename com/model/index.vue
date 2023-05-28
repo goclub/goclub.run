@@ -5,8 +5,8 @@
                 使用表单生成Go代码
             </el-form-item>
             <el-form-item label="示例">
+                <el-button @click="setDefaultModel">清空</el-button>&nbsp;
                 <el-button-group>
-                    <el-button @click="setDefaultModel">清空</el-button>
                     <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash" :key="key">{{
                         key
                         }}
@@ -21,7 +21,7 @@
                         placeholder="SQL表名"
                         v-model="model.tableName"
                 ></el-input>
-                <span v-if="model.tableName != ''" style="opacity: 0.7;">
+                <span v-if="model.tableName != ''">
                     sq.Model
                     <el-input
                             style="width: 12em"
@@ -46,7 +46,7 @@
             <el-form-item label="Source" v-if="q.debug">
                 <el-input type="textarea" :value="JSON.stringify(model,false, '    ')"></el-input>
             </el-form-item>
-            <el-form-item label="软删">
+            <el-form-item label="软删" v-if="model.tableName != ''">
                 <el-select v-model="model.softDelete" @change="changeSofeDelete">
                     <el-option
                             v-for="item in options.softDelete"
@@ -74,15 +74,7 @@
                     />
                 </div>
             </el-form-item>
-            <el-form-item label="主键" v-if="hasPrimaryKey">
-                递增
-                <el-switch v-model="model.isAutoIncrement"></el-switch>
-                <span style="padding:0 5px;">type ID{{ model.structName }} {{
-                    modelData().c.primaryKey().goType
-                    }}</span>
-                <el-switch v-model="model.isIDTypeAlias"></el-switch>
-            </el-form-item>
-            <el-form-item label="代码风格">
+            <el-form-item label="代码风格" v-if="model.fields.length != 0">
                 驼峰
                 <el-select @change="changeCodeStyleCamelCaseID" v-model="model.codeStyle.camelCaseID"
                            style="width:5em;">
@@ -94,6 +86,26 @@
                     ></el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item label="主键" v-if="hasPrimaryKey">
+                递增
+                <el-switch v-model="model.isAutoIncrement"></el-switch>
+                类型别名
+                <el-popover placement="top" trigger="hover">
+                    <code style="padding:0 5px;font-size: 12px;">
+                        type {{ model.structName }} struct {
+                        {{
+                        modelData().c.primaryKey().goField || "ID"
+                        }}
+                        <span v-if="model.isIDTypeAlias">ID{{ model.structName }}</span>
+                        <span v-else>{{
+                            modelData().c.primaryKey().goType
+                            }}</span>
+                        }
+                    </code>
+                    <el-switch slot="reference" v-model="model.isIDTypeAlias"></el-switch>
+                </el-popover>
+
+            </el-form-item>
             <el-form-item label="字段">
                 <div class="fields">
                     <table style="width: 100%">
@@ -104,28 +116,28 @@
                             </th>
                             <th style="width: 40px">
                                 <el-popover placement="top" trigger="hover">
-                                    在 Create 创建请求参数中
+                                    Create 请求参数
                                     <span slot="reference">创建<i style="color:#909399;"
                                                                   class="el-icon-question"></i></span>
                                 </el-popover>
                             </th>
                             <th style="width: 40px">
                                 <el-popover placement="top" trigger="hover">
-                                    在 Update 更新请求参数中
+                                    Update 请求参数
                                     <span slot="reference">更新<i style="color:#909399;"
                                                                   class="el-icon-question"></i></span>
                                 </el-popover>
                             </th>
                             <th style="width: 40px">
                                 <el-popover placement="top" trigger="hover">
-                                    在 Paging 分页请求参数中
+                                    Paging 请求参数
                                     <span slot="reference">搜索<i style="color:#909399;"
                                                                   class="el-icon-question"></i></span>
                                 </el-popover>
                             </th>
                             <th style="width: 40px">
                                 <el-popover placement="top" trigger="hover">
-                                    在 Paging 分页响应数据中
+                                    Paging 响应数据
                                     <span slot="reference">响应<i style="color:#909399;"
                                                                   class="el-icon-question"></i></span>
                                 </el-popover>
@@ -365,8 +377,7 @@ export default {
         bitExampleCode: function () {
             var v = this.model
             var code = `package ${v.interfaceName}` +
-                `func (dep DS) Must${this.modelData().c.signName()}(ctx context.Context) (model m.${v.structName}, err error) {` +
-                "\n\t// ...\n}"
+                `\nfunc (dep DS) Must${this.modelData().c.signName()}(ctx context.Context) (model m.${v.structName}, err error) {`
             return hljs.highlight("go", code).value
         },
         clickTreeCode: function (node, e) {
