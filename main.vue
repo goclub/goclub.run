@@ -10,7 +10,6 @@
             </el-link
             >
         </h1>
-        <p>GO语言工具库/编程实践/教学项目/实战项目</p>
         <el-tabs v-model="activeTool" @tab-click="changeTag">
             <el-tab-pane label="开源项目" name="repo">
                 <div v-for="item in repos" style="padding: 3px 0">

@@ -9,10 +9,10 @@ type coreDS<#- c.signName()#> interface {
 	// Update<#- c.signName()#> 更新
 	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request) (err error)
 <# } -#>
-	// <#- c.signName(v.structName) #>s 查询(所有)
-	<#- c.signName(v.structName) #>s(ctx context.Context) (list []m.<#= v.structName #>, err error)
-	// <#- c.signName(v.structName) #> 查询(单)
-	<#- c.signName(v.structName) #>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, has<#= v.structName #> bool,err error)
+	// <#- c.signName() #>s 查询(所有)
+	<#- c.signName() #>s(ctx context.Context) (list []m.<#= v.structName #>, err error)
+	// <#- c.signName() #> 查询(单)
+	<#- c.signName() #>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, has<#= v.structName #> bool,err error)
 	// Must<#- c.signName()#> 查询(单), 必定存在,不存在返回 xerr.Reject 数据不存在
 	Must<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
 	// Has<#- c.signName()#> 存在(单)

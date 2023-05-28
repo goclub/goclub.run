@@ -2,52 +2,47 @@
 <template>
     <div>
         <el-form label-width="8em" size="mini">
-            <el-form-item label="示例配置">
+            <el-form-item label="查看示例配置">
                 <el-button-group>
+                    <el-button @click="setDefaultModel">清空</el-button>
                     <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash">{{
                         key
                         }}
                     </el-button>
                 </el-button-group>
                 &nbsp;<el-link type="primary" href="https://goclub.run/sql/" target="_blank"
-            >goclub/sql
+            >文档
             </el-link>
             </el-form-item>
             <el-divider></el-divider>
-            <el-form-item label="name">
-                SQL表:
+            <el-form-item label="名称">
                 <el-input
                         style="width: 12em"
                         @blur="blurTableName"
+                        placeholder="SQL表名"
                         v-model="model.tableName"
                 ></el-input>
-                Model:
-                <el-input
-                        style="width: 12em"
-                        placeholder="eg:User"
-                        v-model="model.structName"
-                ></el-input>
-            </el-form-item>
-            <el-form-item label="接口">
-                interface:
-                <el-input
-                        style="width: 10em"
-                        placeholder="eg:Account"
-                        v-model="model.interfaceName"
-                ></el-input>
-                sign:
-                <el-input
-                        style="width: 30em"
-                        :placeholder="'非必填,默认值:' + modelData().c.signName()"
-                        v-model="model.signName"
-                        @blur="blurSignName"
-                ></el-input>
-                <br>
-                <span style="opacity: 0.7;padding-left: 0.4em;">I<span style="color:orange">{{
-                    model.interfaceName
-                    }}</span>.Create<span style="color:orange">{{
-                    modelData().c.signName()
-                    }}</span>Request</span>
+                <div style="padding-left: 14em;" v-if="model.tableName != ''">
+                    sq.Model
+                    <el-input
+                            style="width: 12em"
+                            v-model="model.structName"
+                    ></el-input>
+                    包名
+                    <el-input
+                            style="width: 10em"
+                            v-model="model.interfaceName"
+                    ></el-input>
+                    签名
+                    <el-input
+                            style="width: 10em"
+                            v-model="model.signName"
+                            @blur="blurSignName"
+                    ></el-input>
+                    <div>
+                        <pre class="language-go bit-exmaple-code" v-html="bitExampleCode()"></pre>
+                    </div>
+                </div>
             </el-form-item>
             <el-form-item label="Source" v-if="q.debug">
                 <el-input type="textarea" :value="JSON.stringify(model,false, '    ')"></el-input>
@@ -80,7 +75,7 @@
                     />
                 </div>
             </el-form-item>
-            <el-form-item label="主键配置">
+            <el-form-item label="主键配置" v-if="hasPrimaryKey">
                 递增:
                 <el-switch v-model="model.isAutoIncrement"></el-switch>
                 ID类型别名:
@@ -127,8 +122,8 @@
                                 ></el-input>
                             </td>
                             <td>
+                                <!--                                v-if="row.goType !== 'custom'"-->
                                 <el-select size="mini"
-                                           v-if="row.goType !== 'custom'"
                                            v-model="row.goType" filterable style="width: 120px;display: inline-block;"
                                            @change="changeGoType(index)">
                                     <el-option
@@ -145,8 +140,8 @@
                                         placeholder="eg:PlatformKind"
                                         v-model="row.goTypeCustom"
                                 ></el-input>
-                                <el-button @click="row.goType = 'string'" v-if="row.goType == 'custom'" size="mini"
-                                           icon="el-icon-remove-outline" circle></el-button>
+                                <!--                                <el-button @click="row.goType = 'string'" v-if="row.goType == 'custom'" size="mini"-->
+                                <!--                                           icon="el-icon-remove-outline" circle></el-button>-->
                             </td>
                             <td>
                                 <el-input size="mini" v-model="row.goField"></el-input>
@@ -172,20 +167,22 @@
                             </td>
                         </tr>
                     </table>
-                    <div>
-                        创建/更新时间:
-                        <el-select v-model="model.fieldCreateUpdate" style="width: 15em">
-                            <el-option
-                                    v-for="item in options.fieldCreateUpdate"
-                                    :key="item"
-                                    :label="label(item)"
-                                    :value="item"
-                            ></el-option>
-                        </el-select>
-                    </div>
-                    <el-button @click="addNewField" type="primary" icon="el-icon-plus"
+                    <el-button @click="addNewField" type="primary" icon="el-icon-plus" style="margin-right: 1em;"
                     >添加字段
                     </el-button>
+                    <el-dropdown @command="addTemplateField">
+                        <el-button type="">
+                            添加常用字段<i class="el-icon-arrow-down el-icon--right"></i>
+                        </el-button>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item
+                                    v-for="(item, key) in options.templateField"
+                                    :key="key"
+                                    :command="key"
+                            >{{ key }}
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
                 </div>
             </el-form-item>
         </el-form>
@@ -231,7 +228,7 @@
                 <el-col :span="20">
                     <div class="codeWindowFilename">{{ fileName(codeTypeTab) }}</div>
                     <el-button-group>
-                        <el-button @click="copyCreateFile(codeTypeTab)" type="primary" size="mini">快速创建当前文件
+                        <el-button @click="copyCreateFile(codeTypeTab)" size="mini">快速创建当前文件
                         </el-button>
                         <el-button @click="copyFilename(codeTypeTab)" size="mini">复制文件名</el-button>
                         <el-button @click="copyCode(codeTypeTab)" size="mini">复制代码</el-button>
@@ -271,10 +268,12 @@ const defaultModel = function () {
         structName: "",
         signName: "",
         interfaceName: "",
+        isAutoIncrement: true,
+        isIDTypeAlias: true,
         tableDir: "",
         moduleDir: "",
         tplDir: "",
-        softDelete: "",
+        softDelete: "sq.WithoutSoftDelete",
         customSoftDelete: {
             SoftDeleteWhere: ``,
             SoftDeleteSet: ``,
@@ -286,7 +285,13 @@ const defaultModel = function () {
 export default {
     name: "spec-model",
     components,
-    computed: {},
+    computed: {
+        hasPrimaryKey: function () {
+            return this.model.fields.some(function (item) {
+                return item.isPrimaryKey
+            })
+        },
+    },
 
     created: function () {
         const vm = this;
@@ -296,6 +301,19 @@ export default {
         }, 0);
     },
     methods: {
+        addTemplateField: function (cmd) {
+            this.model.fields = this.model.fields.concat(this.options.templateField[cmd])
+        },
+        setDefaultModel: function () {
+            this.model = defaultModel()
+        },
+        bitExampleCode: function () {
+            var v = this.model
+            var code = `package ${v.interfaceName}` +
+                `func (dep DS) Must${this.modelData().c.signName()}(ctx context.Context) (model m.${v.structName}, err error) {` +
+                "\n\t// ...\n}"
+            return hljs.highlight("go", code).value
+        },
         clickTreeCode: function (node, e) {
             if (node.children) {
                 return
@@ -488,17 +506,8 @@ export default {
                         return v.goField + " " + goType
                     }).join("\n" + h.indent())
                 },
-                signName(d) {
-                    d = d || ""
-                    if (v.signName) {
-                        return v.signName
-                    }
-                    if (v.structName !== v.interfaceName) {
-                        return v.structName.replaceAll(v.interfaceName, '')
-                    } else {
-                        return v.structName
-                    }
-                    return d
+                signName() {
+                    return v.signName
                 },
                 // 要创建的字段
                 createFields: function () {
@@ -530,8 +539,8 @@ export default {
                         case "sq.CreateTimeUpdateTime":
                             code = `col.CreateTime = "create_time"\n    col.UpdateTime = "update_time"`;
                             break;
-                        case "sq.GMTCreateGMTUpdate":
-                            code = `col.GMTCreate = "gmt_create"\n    col.GMTUpdate = "gmt_update"`;
+                        case "sq.GMTCreateGMTModified":
+                            code = `col.GMTCreate = "gmt_create"\n    col.GMTModified = "gmt_update"`;
                             break;
                         default:
                     }
@@ -546,8 +555,8 @@ export default {
                         case "sq.CreateTimeUpdateTime":
                             code = `CreateTime sq.Column\n    UpdateTime sq.Column`;
                             break;
-                        case "sq.GMTCreateGMTUpdate":
-                            code = `GMTCreate sq.Column\n    GMTUpdate sq.Column`;
+                        case "sq.GMTCreateGMTModified":
+                            code = `GMTCreate sq.Column\n    GMTModified sq.Column`;
                             break;
                         default:
                     }
@@ -673,14 +682,14 @@ export default {
         },
         label(value) {
             var hash = {
-                "sq.SoftDeleteTime": "delete_time` IS NULL",
-                "sq.SoftDeletedAt": "deleted_at` IS NULL",
-                "sq.SoftIsDeleted": "is_deleted` = 0",
+                "sq.SoftDeleteTime": "delete_time IS NULL",
+                "sq.SoftDeletedAt": "deleted_at IS NULL",
+                "sq.SoftIsDeleted": "is_deleted = 0",
                 custom: "自定义",
                 "sq.WithoutSoftDelete": "无",
                 "sq.CreateTimeUpdateTime": "create_time update_time",
                 "sq.CreatedAtUpdatedAt": "created_at updated_at",
-                "sq.GMTCreateGMTUpdate": "gmt_create gmt_modified",
+                "sq.GMTCreateGMTModified": "gmt_create gmt_modified",
             };
             if (hash[value]) {
                 return hash[value];
@@ -778,10 +787,17 @@ fi
         },
         blurTableName() {
             const vm = this;
-            vm.model.structName = h.toCamel(vm.model.tableName);
-            if (!vm.model.interfaceName) {
-                vm.model.interfaceName = h.toCamel(vm.model.tableName.replace(/_.*$/, ''))
+            var v = vm.model
+            v.structName = h.toCamel(v.tableName);
+            v.interfaceName = h.toCamel(v.tableName.replace(/_.*$/, ''))
+            if (v.structName === v.interfaceName) {
+                v.signName = v.structName
+            } else {
+                v.signName = v.structName.replaceAll(v.interfaceName, '')
             }
+            v.signName = h.toCamel(v.signName)
+            console.log(v.signName)
+            vm.model = v
         },
         addNewField() {
             const vm = this;
@@ -845,6 +861,50 @@ fi
             exampleDataHash: exampleDataHash,
             migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm") + "_",
             options: {
+                templateField: {
+                    "create_time update_time": [
+                        {
+                            column: "create_time",
+                            goType: "time.Time",
+                            goField: "CreateTime",
+                            label: "创建时间",
+                        },
+                        {
+                            column: "update_time",
+                            goType: "time.Time",
+                            goField: "UpdateTime",
+                            label: "修改时间",
+                        }
+                    ],
+                    "deleted_at updated_at": [
+                        {
+                            column: "deleted_at",
+                            goType: "time.Time",
+                            goField: "DeletedAt",
+                            label: "创建时间",
+                        },
+                        {
+                            column: "updated_at",
+                            goType: "time.Time",
+                            goField: "UpdatedAt",
+                            label: "修改时间",
+                        }
+                    ],
+                    "gmt_create gmt_modified": [
+                        {
+                            column: "gmt_create",
+                            goType: "time.Time",
+                            goField: "GMTCreate",
+                            label: "创建时间",
+                        },
+                        {
+                            column: "gmt_modified",
+                            goType: "time.Time",
+                            goField: "GMTModified",
+                            label: "修改时间",
+                        }
+                    ],
+                },
                 softDelete: [
                     "sq.SoftDeleteTime",
                     "sq.SoftDeletedAt",
@@ -883,7 +943,7 @@ fi
                 fieldCreateUpdate: [
                     "sq.CreateTimeUpdateTime",
                     "sq.CreatedAtUpdatedAt",
-                    "sq.GMTCreateGMTUpdate",
+                    "sq.GMTCreateGMTModified",
                     "无",
                 ],
             },
@@ -896,8 +956,8 @@ fi
             model: model,
             codeType: [
                 'model',
-                'ibase',
                 'ids',
+                'ibase',
                 'base',
                 'ds',
                 'paging.html',
@@ -968,6 +1028,7 @@ fi
 
 .codeWindowFilename {
     display: inline-block;
+    display: none;
     border-bottom: 1px solid #faf6f1;
     border-top-left-radius: 0.3em;
     border-top-right-radius: 0.3em;
@@ -975,5 +1036,12 @@ fi
     padding: 0 10px;
     font-size: 14px;
     line-height: 2;
+}
+
+.bit-exmaple-code {
+    background: transparent;
+    font-size: 12px;
+    line-height: 1;
+    overflow: hidden;
 }
 </style>
