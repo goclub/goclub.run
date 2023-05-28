@@ -2,7 +2,7 @@
 <template>
     <div>
         <el-form label-width="8em" size="mini">
-            <el-form-item label="查看示例配置">
+            <el-form-item label="示例">
                 <el-button-group>
                     <el-button @click="setDefaultModel">清空</el-button>
                     <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash">{{
@@ -14,7 +14,6 @@
             >文档
             </el-link>
             </el-form-item>
-            <el-divider></el-divider>
             <el-form-item label="名称">
                 <el-input
                         style="width: 12em"
@@ -22,7 +21,7 @@
                         placeholder="SQL表名"
                         v-model="model.tableName"
                 ></el-input>
-                <div style="padding-left: 14em;" v-if="model.tableName != ''">
+                <span v-if="model.tableName != ''" style="opacity: 0.7;">
                     sq.Model
                     <el-input
                             style="width: 12em"
@@ -39,9 +38,9 @@
                             v-model="model.signName"
                             @blur="blurSignName"
                     ></el-input>
-                    <div>
-                        <pre class="language-go bit-exmaple-code" v-html="bitExampleCode()"></pre>
-                    </div>
+                </span>
+                <div v-if="model.tableName != ''">
+                    <pre class="language-go bit-exmaple-code" v-html="bitExampleCode()"></pre>
                 </div>
             </el-form-item>
             <el-form-item label="Source" v-if="q.debug">
@@ -95,7 +94,7 @@
                             <th style="width: 150px">Go Type</th>
                             <th style="width: 100px">Go Field</th>
                             <th style="width: 100px">Label</th>
-                            <th>操作</th>
+                            <th style="text-align: left;">操作</th>
                         </tr>
                         </thead>
                         <tr v-for="(row, index) in model.fields">
@@ -122,9 +121,9 @@
                                 ></el-input>
                             </td>
                             <td>
-                                <!--                                v-if="row.goType !== 'custom'"-->
                                 <el-select size="mini"
-                                           v-model="row.goType" filterable style="width: 120px;display: inline-block;"
+                                           v-if="row.goType !== 'custom'"
+                                           v-model="row.goType" filterable style="display: inline-block;"
                                            @change="changeGoType(index)">
                                     <el-option
                                             v-for="item in options.fieldType"
@@ -134,14 +133,14 @@
                                     ></el-option>
                                 </el-select>
                                 <el-input
-                                        style="width:120px;display: inline-block;"
                                         size="mini"
                                         v-if="row.goType == 'custom'"
                                         placeholder="eg:PlatformKind"
                                         v-model="row.goTypeCustom"
-                                ></el-input>
-                                <!--                                <el-button @click="row.goType = 'string'" v-if="row.goType == 'custom'" size="mini"-->
-                                <!--                                           icon="el-icon-remove-outline" circle></el-button>-->
+                                >
+                                    <el-button @click="row.goType = 'string'" slot="append"
+                                               icon="el-icon-delete"></el-button>
+                                </el-input>
                             </td>
                             <td>
                                 <el-input size="mini" v-model="row.goField"></el-input>
@@ -153,17 +152,17 @@
                                 ></el-input>
                             </td>
                             <td>
-                                <el-button
-                                        @click="removeFieldsItem(index)"
-                                        size="mini"
-                                        type="danger"
-                                        icon="el-icon-remove"
-                                ></el-button>
-
-                                <el-button icon="el-icon-arrow-up" size="mini"
-                                           @click="swapIndex($event, index, 'up')"></el-button>
-                                <el-button icon="el-icon-arrow-down" size="mini"
-                                           @click="swapIndex($event, index, 'down')"></el-button>
+                                <el-button-group>
+                                    <el-button
+                                            @click="removeFieldsItem(index)"
+                                            size="mini"
+                                            icon="el-icon-delete"
+                                    ></el-button>
+                                    <el-button icon="el-icon-arrow-up" size="mini"
+                                               @click="swapIndex($event, index, 'up')"></el-button>
+                                    <el-button icon="el-icon-arrow-down" size="mini"
+                                               @click="swapIndex($event, index, 'down')"></el-button>
+                                </el-button-group>
                             </td>
                         </tr>
                     </table>
@@ -194,12 +193,12 @@
             </el-col>
         </el-row>
         <div class="codeWindow">
-            <div class="codeWindowHead"></div>
+            <div class="codeWindowHead">根据配置生成的代码</div>
             <el-row>
                 <el-col :span="4">
-                    <el-button @click="copyAllCreateFile" style="width: 100%;border-radius: 0;" type="primary"
+                    <el-button @click="copyAllCreateFile" style="width: 100%;border-radius: 0;" type="text"
                                size="mini">
-                        快速创建所有文件
+                        创建所有文件
                     </el-button>
                     <div class="fileList">
                         <el-tree
@@ -227,12 +226,18 @@
                 </el-col>
                 <el-col :span="20">
                     <div class="codeWindowFilename">{{ fileName(codeTypeTab) }}</div>
-                    <el-button-group>
-                        <el-button @click="copyCreateFile(codeTypeTab)" size="mini">快速创建当前文件
+                    <div class="codeWindowTool">
+                        <el-button @click="copyCreateFile(codeTypeTab)" size="mini" type="text">创建当前文件
                         </el-button>
-                        <el-button @click="copyFilename(codeTypeTab)" size="mini">复制文件名</el-button>
-                        <el-button @click="copyCode(codeTypeTab)" size="mini">复制代码</el-button>
-                    </el-button-group>
+                        <el-divider :underline="false" direction="vertical"></el-divider>
+                        <el-button :underline="false" @click="copyFilename(codeTypeTab)" type="text" size="mini">
+                            复制文件名
+                        </el-button>
+                        <el-divider direction="vertical"></el-divider>
+                        <el-button :underline="false" @click="copyCode(codeTypeTab)" type="text" size="mini">
+                            复制代码
+                        </el-button>
+                    </div>
                     <pre class="language-go" v-html="modelResultCode(codeTypeTab)"></pre>
                 </el-col>
             </el-row>
@@ -996,7 +1001,6 @@ fi
     background-color: white;
     border-radius: 5px;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .1);
-    padding-top: 30px;
     position: relative;
     border: 1px solid #d0d7de;
 
@@ -1007,7 +1011,10 @@ fi
 }
 
 .codeWindowHead {
-    border-bottom: 1px solid rgba(225, 225, 225, 0.98);
+    padding-left: 80px;
+    line-height: 30px;
+    font-size: 12px;
+    color: #999;
 }
 
 .codeWindowHead::before {
@@ -1016,8 +1023,8 @@ fi
     box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
     content: ' ';
     height: 12px;
-    margin-top: -20px;
     position: absolute;
+    top: 8px;
     width: 12px;
     left: 10px;
 }
@@ -1038,10 +1045,20 @@ fi
     line-height: 2;
 }
 
+.codeWindowTool {
+    user-select: none;
+    text-align: right;
+    background: #fdf6e3;
+    margin-bottom: -22px;
+    line-height: 22px;
+    padding-right: 5px;
+}
+
 .bit-exmaple-code {
     background: transparent;
     font-size: 12px;
     line-height: 1;
     overflow: hidden;
 }
+
 </style>
