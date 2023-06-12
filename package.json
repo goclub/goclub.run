@@ -9,6 +9,7 @@
     "vite": "2.7.2"
   },
   "dependencies": {
+    "@vue/shared": "^3.3.4",
     "copy-to-clipboard": "3.3.1",
     "date-format": "3.0.0",
     "dayjs": "^1.10.7",

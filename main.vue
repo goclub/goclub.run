@@ -43,12 +43,9 @@ import SpecEnum from "./com/enum/main.js";
 import SpecModel from "./com/model/index.vue";
 import GenQrcode from "./com/qrcode/index.vue";
 import GenRandom from "./com/random/main.js";
-import GithubButton from "vue-github-button";
 import qs from "query-string";
 
-const components = {
-    GithubButton,
-};
+const components = {};
 
 components[SpecEnum.name] = SpecEnum;
 components[SpecModel.name] = SpecModel;

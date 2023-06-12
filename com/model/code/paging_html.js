@@ -13,9 +13,9 @@ export default `[[extends "./layout/pc.html"]]
                     <!-- _enum().<#= h.firstLow(item.goField) #> 在 project.js 中配置 -->
                     <el-option 
                 <# if (item.goField.toLowerCase().endsWith('id')) { -#>
-        v-for="(item, key) in option.<#= h.firstLow(item.goField).replace(/id$/, '').replace(/ID$/, '') #>"
+        v-if="option.<#= h.firstLow(item.goField).replace(/id$/, '').replace(/ID$/, '') #>" v-for="(item, key) in option.<#= h.firstLow(item.goField).replace(/id$/, '').replace(/ID$/, '') #>"
                 <# } else { -#>
-        v-for="(item, key) in _enum().<#= h.firstLow(item.goField) #>"
+        v-if="_enum().<#= h.firstLow(item.goField)" v-for="(item, key) in _enum().<#= h.firstLow(item.goField) #>"
                 <# } -#>
         :key="item.key" :value="item.value" :label="item.label"
                     ></el-option>
@@ -42,7 +42,7 @@ export default `[[extends "./layout/pc.html"]]
         </el-form>
         <el-table :data="list" style="width: 100%">
 <# c.pagingReplyFields().forEach(function (item) { -#>
-            <el-table-column label="<#= h.firstLow(c.snakeToCamel(item.column)) #>" prop="<#= h.firstLow(c.snakeToCamel(item.column)) #>" <#if (h.firstLow(c.snakeToCamel(item.column)) == "id"){ #> width="50" <# } -#> ></el-table-column>
+            <el-table-column label="<#= h.firstLow(c.snakeToCamel(item.column)) #>" prop="<#= c.label(item) #>" <#if (h.firstLow(c.snakeToCamel(item.column)) == "id"){ #> width="50" <# } -#> ></el-table-column>
 <# }) -#>
             <el-table-column label="操作">
                 <template slot-scope="scope">

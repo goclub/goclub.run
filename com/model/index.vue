@@ -1,10 +1,10 @@
 <template>
     <div>
         <el-form label-width="6em" size="mini">
-            <el-form-item label="SQL">
-                使用表单生成Go代码
+            <el-form-item label="">
+                goclub/sql 根据表单生成 CRUD 代码,跟简单重复的工作说永别.
             </el-form-item>
-            <el-form-item label="示例">
+            <el-form-item label="参考">
                 <el-button @click="setDefaultModel">清空</el-button>&nbsp;
                 <el-button-group>
                     <el-button @click="useExampleData(key)" v-for="(value, key) in exampleDataHash" :key="key">{{
@@ -73,18 +73,6 @@
                             v-model="model.customSoftDelete.SoftDeleteSet"
                     />
                 </div>
-            </el-form-item>
-            <el-form-item label="代码风格" v-if="model.fields.length != 0">
-                驼峰
-                <el-select @change="changeCodeStyleCamelCaseID" v-model="model.codeStyle.camelCaseID"
-                           style="width:5em;">
-                    <el-option
-                            v-for="item in options.camelCaseID"
-                            :key="item"
-                            :label="item"
-                            :value="item"
-                    ></el-option>
-                </el-select>
             </el-form-item>
             <el-form-item label="主键" v-if="hasPrimaryKey">
                 递增
@@ -245,7 +233,9 @@
             </el-col>
         </el-row>
         <div class="codeWindow">
-            <div class="codeWindowHead">模型/接口/实现</div>
+            <div class="codeWindowHead">
+                <strong>{{ fileTitle(codeTypeTab) }}</strong>: {{ fileName(codeTypeTab) }}
+            </div>
             <el-row>
                 <el-col :span="4">
                     <el-button @click="copyAllCreateFile" style="width: 100%;border-radius: 0;" type="text"
@@ -259,25 +249,35 @@
                                 :default-expand-all="true"
                         >
                                   <span slot-scope="{ node, data }">
-                                      <span v-if="data.children">{{ data.label }}</span>
-                                      <el-link type="primary"
-                                               v-else-if="data.key == fileName(codeTypeTab)">{{ data.label }}</el-link>
-                                     <el-link @click="codeTypeTab = mapFileCode(data.value)" v-else
-                                     >{{
-                                         data.label
-                                         }}</el-link>
+                                       <span v-if="data.children">{{ data.label }}</span>
+                                                <el-link type="primary" v-else-if="data.key == fileName(codeTypeTab)">{{
+                                                    data.label
+                                                    }}</el-link>
+                                                <el-link @click="codeTypeTab = mapFileCode(data.value)"
+                                                         v-else>{{ data.label }}</el-link>
                                   </span>
                         </el-tree>
-                        模型:
-                        <el-input size="mini" :placeholder="defaultTableDir()" v-model="model.tableDir"></el-input>
-                        模块:
-                        <el-input size="mini" :placeholder="defaultModuleDir()" v-model="model.moduleDir"></el-input>
-                        模版:
-                        <el-input size="mini" :placeholder="defaultTplDir()" v-model="model.tplDir"></el-input>
+                        模型目录:
+                        <el-input size="mini" :placeholder="defaultDir().sql" v-model="model.dir.sql"></el-input>
+                        模块目录:
+                        <el-input size="mini" :placeholder="defaultDir().module" v-model="model.dir.module"></el-input>
+                        模版目录:
+                        <el-input size="mini" :placeholder="defaultDir().tpl" v-model="model.dir.tpl"></el-input>
+                        路由目录:
+                        <el-input size="mini" :placeholder="defaultDir().handle" v-model="model.dir.handle"></el-input>
+                        驼峰ID:
+                        <el-select @change="changeCodeStyleCamelCaseID" v-model="model.codeStyle.camelCaseID"
+                                   size="mini">
+                            <el-option
+                                    v-for="item in options.camelCaseID"
+                                    :key="item"
+                                    :label="item"
+                                    :value="item"
+                            ></el-option>
+                        </el-select>
                     </div>
                 </el-col>
                 <el-col :span="20">
-                    <div class="codeWindowFilename">{{ fileName(codeTypeTab) }}</div>
                     <div class="codeWindowTool">
                         <el-button @click="copyCreateFile(codeTypeTab)" size="mini" type="text">创建当前文件
                         </el-button>
@@ -299,12 +299,14 @@
 <script>
 import exampleDataHash from "./exampleDataHash.js";
 import extend from "safe-extend"
-import model from "./code/model.js";
-import ds from "./code/ds.js";
-import ids from "./code/ids.js";
-import base from "./code/base.js";
-import ibase from "./code/ibase.js";
-import pagingHTML from "./code/paging_html.js"
+import modelTPL from "./code/model.js";
+import dsTPL from "./code/ds.js";
+import idsTPL from "./code/ids.js";
+import baseTPL from "./code/base.js";
+import ibaseTPL from "./code/ibase.js";
+import handleTPL from "./code/handle.js";
+import pagingHTMLTPL from "./code/paging_html.js"
+import viewTPL from "./code/view.js";
 import * as ejs from "ejs";
 import {snakeCase} from "snake-case";
 import copy from "copy-to-clipboard";
@@ -328,9 +330,13 @@ const defaultModel = function () {
         interfaceName: "",
         isAutoIncrement: true,
         isIDTypeAlias: true,
-        tableDir: "",
-        moduleDir: "",
-        tplDir: "",
+        dir: {
+            sql: "",
+            module: "",
+            tpl: "",
+            handle: "",
+            view: "",
+        },
         softDelete: "sq.WithoutSoftDelete",
         codeStyle: {
             camelCaseID: "ID",
@@ -372,7 +378,9 @@ export default {
             this.model.fields = this.model.fields.concat(this.options.templateField[cmd])
         },
         setDefaultModel: function () {
+            var codeStyle = this.model.codeStyle
             this.model = defaultModel()
+            this.model.codeStyle = codeStyle
         },
         bitExampleCode: function () {
             var v = this.model
@@ -455,18 +463,25 @@ export default {
             });
             maxGoFieldLength++;
             maxGoTypeLength++;
+            var snakeToCamel = function (str) {
+                var out = h.toCamel(
+                    str.replace(/([-_][a-z])/g, function (group) {
+                        return group.toUpperCase().replace("-", "").replace("_", "");
+                    })
+                )
+                if (v.codeStyle.camelCaseID === "ID") {
+                    return out = out.replace(/Id$/, "ID")
+                }
+                return out;
+            }
             var c = {
-                snakeToCamel(str) {
-                    var out = h.toCamel(
-                        str.replace(/([-_][a-z])/g, function (group) {
-                            return group.toUpperCase().replace("-", "").replace("_", "");
-                        })
-                    )
-                    if (v.codeStyle.camelCaseID == "ID") {
-                        return out = out.replace(/Id$/, "ID")
+                label(item) {
+                    if (item.label) {
+                        return item.label
                     }
-                    return out;
+                    return h.firstLow(snakeToCamel(item.column))
                 },
+                snakeToCamel: snakeToCamel,
                 isAutoIncrement() {
                     if (v.isAutoIncrement) {
                         return v.fields.some(function (item) {
@@ -713,26 +728,18 @@ export default {
         },
         modelResult(type, kind) {
             var tpl = "";
-            switch (type) {
-                case "model":
-                    tpl = model;
-                    break;
-                case 'ibase':
-                    tpl = ibase;
-                    break
-                case 'base':
-                    tpl = base;
-                    break
-                case "ds":
-                    tpl = ds;
-                    break;
-                case "ids":
-                    tpl = ids;
-                    break;
-                case 'paging.html':
-                    tpl = pagingHTML
-                    break;
+            var hash = {
+                'model': modelTPL,
+                'ibase': ibaseTPL,
+                'base': baseTPL,
+                'ds': dsTPL,
+                'ids': idsTPL,
+                "paging.html": pagingHTMLTPL,
+                'view': viewTPL,
+                'handle': handleTPL,
+
             }
+            tpl = hash[type]
             var data = this.modelData(kind)
             return ejs.render(
                 tpl,
@@ -779,6 +786,15 @@ export default {
                 return index != removeIndex;
             });
         },
+        defaultDir() {
+            return {
+                "sql": "1model",
+                "module": `${h.firstLow(this.model.interfaceName)}`,
+                "tpl": "tpl",
+                "handle": "1http",
+                "view": "view/admin",
+            }
+        },
         defaultTableDir() {
             return "1model"
         },
@@ -793,16 +809,32 @@ export default {
         fileName(type) {
             const vm = this;
             var name = snakeCase(vm.model.tableName)
-            var tableDir = vm.model.tableDir || vm.defaultTableDir()
-            var moduleDir = vm.model.moduleDir || vm.defaultModuleDir()
-            var tplDir = vm.model.tplDir || vm.defaultTplDir()
+            var tableDir = vm.model.dir.sql || vm.defaultDir().sql
+            var moduleDir = vm.model.dir.module || vm.defaultDir().module
+            var tplDir = vm.model.dir.tpl || vm.defaultDir().tpl
+            var handleDir = vm.model.dir.handle || vm.defaultDir().handle
+            var viewDir = vm.model.dir.view || vm.defaultDir().view
             var hash = {
                 'ibase': `internal/${moduleDir}/interface/ds.go`,
                 'base': `internal/${moduleDir}/ds.go`,
                 "model": `internal/${tableDir}/sql_` + name + ".go",
                 "ds": `internal/${moduleDir}/ds_${name}.go`,
                 "ids": `internal/${moduleDir}/interface/ds_${name}.go`,
-                'paging.html': `${tplDir}/admin/${name}.html`
+                'handle': `internal/${handleDir}/handle_manager_${name}.go`,
+                'paging.html': `${tplDir}/admin/${name}.html`,
+                'view': `internal/${viewDir}/view.go`,
+            }
+            return hash[type]
+        },
+        fileTitle(type) {
+            var hash = {
+                'ibase': `接口`,
+                'base': `实现(New)`,
+                "model": `SQL模型`,
+                "ds": `实现(方法)`,
+                "ids": `接口`,
+                'handle': `路由`,
+                'paging.html': `分页模版`
             }
             return hash[type]
         },
@@ -935,7 +967,7 @@ fi
                 console.log(err);
             }
         }
-        var codeTypeTab = 'model'
+        var codeTypeTab = 'handle'
         return {
             q: querystring.parse(location.search.slice(1)),
             exampleDataHash: exampleDataHash,
@@ -1044,7 +1076,9 @@ fi
                 'ibase',
                 'base',
                 'ds',
-                'paging.html',
+                // 'paging.html',
+                // 'view',
+                // 'handle',
             ],
             codeTypeTab: codeTypeTab,
         };
@@ -1093,7 +1127,6 @@ fi
     padding-left: 17%;
     line-height: 30px;
     font-size: 12px;
-    color: #999;
 }
 
 .codeWindowHead::before {
@@ -1120,7 +1153,7 @@ fi
     border-top-right-radius: 0.3em;
     user-select: none;
     padding: 0 10px;
-    font-size: 14px;
+    font-weight: bold;
     line-height: 2;
 }
 
