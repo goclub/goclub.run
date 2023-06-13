@@ -1,6 +1,7 @@
 export default `package I<#- v.interfaceName #>
 
 import vd "github.com/goclub/validator"
+import "time"
 
 type coreDS<#- c.signName()#> interface {
 	// Create<#- c.signName()#> 创建 
@@ -28,7 +29,7 @@ type coreDS<#- c.signName()#> interface {
 type Paging<#- c.signName()#>Request struct {	
 <# c.pagingReqFields().forEach(function (item) { -#>
 <# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
-    Begin<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+    Start<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
     End<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
 <# } else { -#>
     <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>

@@ -239,7 +239,7 @@
             </div>
             <el-row>
                 <el-col :span="4">
-                    <el-button @click="copyAllCreateFile" style="width: 100%;border-radius: 0;" type="text"
+                    <el-button @click="copyAllCreateFile" style="width: 100%;border-radius: 0;" type="primary"
                                size="mini">
                         创建所有文件
                     </el-button>
@@ -528,7 +528,7 @@ export default {
                             if (hasPrefix(item.goType, "*")) {
                                 return `len(${item.goField}) != nil`
                             }
-                            return `!${item.goField}.IsZero()`
+                            return `${item.goField}.IsZero()`
                     }
                 },
                 needUpdate() {
