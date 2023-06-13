@@ -99,7 +99,11 @@ func (dep DS) Paging<#- c.signName()#>(ctx context.Context, req I<#- v.interface
 	var qb = sq.QB{
 	    Where:sq.
 <# c.pagingReqFields().forEach(function (item, index) { -#>
+<# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
+        And(col.<#= item.goField #>, sq.IF(req.req.Begin<#= item.goField #>.IsZero() == false, sq.Between(req.Begin<#= item.goField #>, req.End<#= item.goField #>))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>,
+<# } else { -#>
         And(col.<#= item.goField #>, sq.IF(req.<#- c.SQIFCode(item) #>, sq.<# if(item.goType == "string"){#>Like<#}else {#>Equal<#}#>(req.<#= item.goField #>)))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>
+<# } -#>
 <# }) -#>
         OrderBy:[]sq.OrderBy{{col.ID, sq.DESC}},
 	}

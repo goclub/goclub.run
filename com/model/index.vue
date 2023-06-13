@@ -189,6 +189,7 @@
                                 <el-input
                                         size="mini"
                                         v-model="row.label"
+                                        placeholder="非必填"
                                 ></el-input>
                             </td>
                             <td>
@@ -250,11 +251,12 @@
                         >
                                   <span slot-scope="{ node, data }">
                                        <span v-if="data.children">{{ data.label }}</span>
-                                                <el-link type="primary" v-else-if="data.key == fileName(codeTypeTab)">{{
-                                                    data.label
-                                                    }}</el-link>
-                                                <el-link @click="codeTypeTab = mapFileCode(data.value)"
-                                                         v-else>{{ data.label }}</el-link>
+                                    <el-link type="primary" v-else-if="data.key == fileName(codeTypeTab)">{{
+                                        data.label
+                                        }}</el-link>
+                                    <el-link :alt="fileTitle(mapFileCode(data.key))"
+                                             @click="codeTypeTab = mapFileCode(data.value)"
+                                             v-else>{{ data.label }}</el-link>
                                   </span>
                         </el-tree>
                         模型目录:

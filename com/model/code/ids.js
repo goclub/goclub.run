@@ -27,7 +27,12 @@ type coreDS<#- c.signName()#> interface {
 <#if (c.needPaging()) { -#>  
 type Paging<#- c.signName()#>Request struct {	
 <# c.pagingReqFields().forEach(function (item) { -#>
+<# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
+    Begin<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+    End<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+<# } else { -#>
     <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+<# } -#>
 <# }) -#>
     m.Paging
 }

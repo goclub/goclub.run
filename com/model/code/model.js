@@ -17,12 +17,12 @@ func (id ID<#- v.structName #>) <#= h.toCamel(c.primaryKey().goType) #>() <#- c.
     return <#- c.primaryKey().goType #>(id)
 }
 <# if (c.primaryKey().goType.includes("uint")) {-#>
-func (id ID<#- v.structName #>) String() {
-    return strconv.FormatUint(uint64(v), 10)
+func (id ID<#- v.structName #>) String() string {
+    return strconv.FormatUint(uint64(id), 10)
 }
 <# } else if (c.primaryKey().goType.includes("int")) {-#>
-func (id ID<#- v.structName #>) String() {
-    return strconv.FormatInt(int64(v), 10)
+func (id ID<#- v.structName #>) String() string {
+    return strconv.FormatInt(int64(id), 10)
 }
 <# } -#>
 <# } -#>
@@ -60,7 +60,7 @@ func (v *<#= v.structName #>) AfterInsert(result sq.Result) (err error) {
     return
 }
 <# } #>
-// Column 列名字典
+// Column dict
 func (v Table<#= v.structName #>) Column() (col struct{
 <# v.fields.forEach(function (item) { -#>
     <#= c.padGoField(item)#> sq.Column

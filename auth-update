@@ -1,0 +1,16 @@
+#!/bin/bash
+
+process_name="pre-new-cloud-http"
+
+while true; do
+  # 检查 Git 仓库是否有新提交
+  if git pull | grep -q 'Fast-forward'; then
+    # 执行构建和重启命令，并打印相应的信息
+    yarn && npm run build  && echo "Build successful."
+  else
+    echo "No new commits found. Waiting..."
+  fi
+
+  # 延迟 2 秒钟后继续下一轮循环
+  sleep 2
+done
