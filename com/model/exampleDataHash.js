@@ -111,7 +111,7 @@ export default {
             }
         ]
     },
-    AccountOpen: {
+    'AccountOpen': {
         "packageName": "m",
         "tableName": "account_open",
         "structName": "AccountOpen",
@@ -154,6 +154,82 @@ export default {
                 "column": "create_time",
                 "goType": "time.Time",
                 "goField": "CreateTime"
+            }
+        ]
+    },
+    'TinyURL': {
+        "packageName": "m",
+        "tableName": "tiny_url",
+        "structName": "TinyURL",
+        "signName": "URL",
+        "interfaceName": "TinyURL",
+        "isAutoIncrement": true,
+        "isIDTypeAlias": true,
+        "dir": {
+            "sql": "",
+            "module": "tiny_url",
+            "tpl": "",
+            "handle": "",
+            "view": ""
+        },
+        "softDelete": "sq.WithoutSoftDelete",
+        "codeStyle": {
+            "camelCaseID": "ID"
+        },
+        "customSoftDelete": {
+            "SoftDeleteWhere": "",
+            "SoftDeleteSet": ""
+        },
+        "fieldCreateUpdate": "",
+        "fields": [
+            {
+                "isPrimaryKey": true,
+                "column": "id",
+                "goType": "uint64",
+                "goField": "ID",
+                "goTypeCustom": "ID",
+                "pagingReply": true
+            },
+            {
+                "isPrimaryKey": false,
+                "column": "path",
+                "goType": "string",
+                "goField": "Path",
+                "label": "短路径",
+                "isCreate": true,
+                "pagingReply": true,
+                "pagingReq": true
+            },
+            {
+                "isPrimaryKey": false,
+                "column": "url",
+                "goType": "string",
+                "goField": "URL",
+                "label": "目标地址",
+                "isCreate": true,
+                "isUpdate": true,
+                "pagingReply": true,
+                "pagingReq": true
+            },
+            {
+                "isPrimaryKey": false,
+                "column": "client_id",
+                'isAuth': true,
+                "goType": "custom",
+                "goField": "ClientID",
+                "goTypeCustom": "IDClient",
+                "label": "客户账号",
+                "isCreate": true,
+                "pagingReply": true,
+                "pagingReq": true
+            },
+            {
+                "column": "create_time",
+                "goType": "time.Time",
+                "goField": "CreateTime",
+                "label": "创建时间",
+                "pagingReply": true,
+                "pagingReq": true
             }
         ]
     },

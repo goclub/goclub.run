@@ -4,11 +4,13 @@ import vd "github.com/goclub/validator"
 import "time"
 
 type coreDS<#- c.signName()#> interface {
+<#if (c.needCreate()) { -#>
 	// Create<#- c.signName()#> 创建 
 	Create<#- c.signName()#>(ctx context.Context, req Create<#- c.signName() #>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
+<# } -#>
 <#if (c.needUpdate()) { -#>
 	// Update<#- c.signName()#> 更新
-	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request) (err error)
+	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request, clientID m.IDClient) (err error)
 <# } -#>
 	// <#- c.signName() #>s 查询(所有)
 	<#- c.signName() #>s(ctx context.Context) (list []m.<#= v.structName #>, err error)
@@ -20,9 +22,14 @@ type coreDS<#- c.signName()#> interface {
 	Has<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (has bool, err error)
 	// Have<#- c.signName()#> 存在(多) 入参主键的数量与数据库中数据的数量相等则返回 true
 	Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have bool, err error)
-<# if (c.needPaging()) { -#>	// Paging<#- c.signName()#> 分页
-  // 注意: 此接口目前只给管理后台使用,提供给其他角色使用需要入参加上角色对应的ID.例如 accountID, userID
+<# if (c.needPaging()) { -#>
+  // Paging<#- c.signName()#> 分页
+  // 注意: 此接口目前只给管理员后台使用,提供给其他角色使用需要入参加上角色对应的ID.例如 accountID, userID
 	Paging<#- c.signName()#>(ctx context.Context, req Paging<#- c.signName()#>Request) (reply Paging<#- c.signName()#>Reply, err error)
+<# } -#>
+<# if(c.authField()) {-#>
+  Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+  Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
 <# } -#>
 }
 <#if (c.needPaging()) { -#>  
@@ -47,6 +54,17 @@ type Paging<#- c.signName()#>ReplyItem struct {
 <# }) -#>
 }
 <# } -#>
+<#if (c.needCreate()) { -#>
+type Create<#- c.signName()#>Request struct {
+<# c.createFields().forEach(function (item) { -#>
+    <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+<# }) -#>
+}
+func (v Create<#- c.signName()#>Request) VD(r *vd.Rule) (err error) {
+    // TODO: add validation rule
+    return
+}
+<# }-#>
 <#if (c.needUpdate()) { -#>
 type Update<#- c.signName()#>Request struct {
 <#= c.primaryKeyGoStructFieldType() #>
@@ -59,13 +77,4 @@ func (v Update<#- c.signName()#>Request) VD(r *vd.Rule) (err error) {
 	return
 }
 <# }-#>
-type Create<#- c.signName()#>Request struct {
-<# c.createFields().forEach(function (item) { -#>
-    <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
-<# }) -#>
-}
-func (v Create<#- c.signName()#>Request) VD(r *vd.Rule) (err error) {
-    // TODO: add validation rule
-    return
-}
 `

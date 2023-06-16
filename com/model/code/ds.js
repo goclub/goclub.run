@@ -4,7 +4,7 @@ import sl "github.com/goclub/slice"
 import sq "github.com/goclub/sql"
 import xerr "github.com/goclub/error"
 import "time"
-
+<#if (c.needCreate()) { -#>
 func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Create<#- c.signName()#>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error){
 	<#- h.firstLow(v.structName) #> = m.<#- v.structName #>{
 <# c.createFields().forEach(function (item) { -#>
@@ -16,6 +16,7 @@ func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interface
 	}
 	return
 }
+<# }-#>
 <#if (c.needUpdate()) { -#>
 func (dep DS) Update<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Update<#- c.signName()#>Request) (err error){
 	col := m.Table<#- v.structName#>{}.Column()
@@ -125,4 +126,29 @@ func (dep DS) Paging<#- c.signName()#>(ctx context.Context, req I<#- v.interface
     })
     return
 }     
-<# } -#>`
+<# } -#>
+<# if(c.authField()) {-#>
+func (dep DS) Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+    if <#- c.goFieldIsZero(c.authField()) #> { return xerr.Reject(1, "不能为空", false)}
+    if <#= h.firstLow(v.structName) #>.<#- c.authField().goField #> != <#- h.firstLow(c.authField().goField) #> {
+        return xerr.Reject(1, "数据不属于你,刷新页面后重试", false)
+    }
+    return
+}
+func (dep DS) Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+    col := m.<#= v.structName #>{}.Column()
+    var has bool
+    if has, err = dep.mysql.Has(ctx, &m.<#= v.structName #>{}, sq.QB{
+        Where: sq.
+        And(col.<#= c.primaryKeyGoField() #>, sq.Equal(<#= c.primaryKeyGoVar() #>)).
+        And(col.<#- c.authField().goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>)),
+    }); err != nil {
+        return
+    }
+    if has == false {
+        return xerr.Reject(1, "数据不属于你,刷新页面后重试", false)
+    }
+    return
+}
+<# } -#>
+`

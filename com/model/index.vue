@@ -119,7 +119,7 @@
                             <th style="width: 40px">
                                 <el-popover placement="top" trigger="hover">
                                     Paging 请求参数
-                                    <span slot="reference">搜索<i style="color:#909399;"
+                                    <span slot="reference">请求<i style="color:#909399;"
                                                                   class="el-icon-question"></i></span>
                                 </el-popover>
                             </th>
@@ -127,6 +127,13 @@
                                 <el-popover placement="top" trigger="hover">
                                     Paging 响应数据
                                     <span slot="reference">响应<i style="color:#909399;"
+                                                                  class="el-icon-question"></i></span>
+                                </el-popover>
+                            </th>
+                            <th style="width: 40px">
+                                <el-popover placement="top" trigger="hover">
+                                    角色鉴权字段
+                                    <span slot="reference">鉴权<i style="color:#909399;"
                                                                   class="el-icon-question"></i></span>
                                 </el-popover>
                             </th>
@@ -152,6 +159,10 @@
                             </td>
                             <td>
                                 <el-switch size="mini" v-model="row.pagingReply"></el-switch>
+                            </td>
+                            <td>
+                                <el-switch :disabled="row.isPrimaryKey" size="mini" @change="changeAuth($event, index)"
+                                           v-model="row.isAuth"></el-switch>
                             </td>
                             <td>
                                 <el-input
@@ -370,6 +381,14 @@ export default {
         }, 0);
     },
     methods: {
+        changeAuth: function (e, i) {
+            if (e === true) {
+                this.model.fields = this.model.fields.map(function (v, index) {
+                    v.isAuth = index === i
+                    return v
+                })
+            }
+        },
         changeCodeStyleCamelCaseID: function () {
             const vm = this
             vm.model.fields.forEach(function (v, i) {
@@ -531,6 +550,12 @@ export default {
                             return `${item.goField}.IsZero()`
                     }
                 },
+                needCreate() {
+                    var need = v.fields.some(function (item) {
+                        return item.isCreate
+                    })
+                    return need
+                },
                 needUpdate() {
                     var need = v.fields.some(function (item) {
                         return item.isUpdate
@@ -568,11 +593,18 @@ export default {
                         return `\n${h.indent(indent)}And(col.${v.goField}, sq.Equal(${prefix}${field})).`
                     }).join("").replace(/\.$/, '') + ""
                 },
-                primaryKeyGoVar(isSlice) {
+                primaryKeyGoVar() {
                     return v.fields.filter(function (v) {
                         return v.isPrimaryKey;
                     }).map(function (v) {
                         return h.firstLow(v.goField)
+                    }).join(", ")
+                },
+                primaryKeyGoField() {
+                    return v.fields.filter(function (v) {
+                        return v.isPrimaryKey;
+                    }).map(function (v) {
+                        return v.goField
                     }).join(", ")
                 },
                 primaryKeyGoVarType() {
@@ -602,6 +634,15 @@ export default {
                 },
                 signName() {
                     return v.signName
+                },
+                authField: function () {
+                    var out = v.fields.filter(function (v) {
+                        return v.isAuth;
+                    });
+                    if (out.length === 0) {
+                        return false
+                    }
+                    return out[0]
                 },
                 // 要创建的字段
                 createFields: function () {
@@ -693,16 +734,38 @@ export default {
                     }
                     return ` sq:"${tagItems.join("|")}"`;
                 },
-                padGoType: function (item, prefix) {
+                goFieldIsZero(item, prefix) {
+                    var field = h.firstLow(item.goField)
+                    switch (item.goType) {
+                        case 'custom':
+                            return field + ".IsZero()"
+                            break
+                        case 'string':
+                        case '[]byte':
+                        case '[]rune':
+                        case '[]int8':
+                            return `len(${field}) == 0`
+                            break
+                        default:
+                            return `${field} == 0`
+                    }
+                },
+                goType: function (item, prefix) {
                     prefix = prefix || ""
                     let type = item.goType;
                     if (type === "custom") {
+                        if (item.goTypeCustom.indexOf('.') != -1) {
+                            prefix = ""
+                        }
                         type = `${prefix}` + item.goTypeCustom || '';
                     }
                     if (v.isIDTypeAlias && item.isPrimaryKey) {
                         type = `${prefix}` + "ID" + vm.model.structName;
                     }
-                    return type.padEnd(maxGoTypeLength, " ");
+                    return type
+                },
+                padGoType: function (item, prefix) {
+                    return this.goType(item, prefix).padEnd(maxGoTypeLength, " ");
                 },
                 padGoField: function (item) {
                     return item.goField.padEnd(maxGoFieldLength, " ");
@@ -969,7 +1032,8 @@ fi
                 console.log(err);
             }
         }
-        var codeTypeTab = 'handle'
+        var codeTypeTab = querystring.parse(location.search).codeTypeTab || 'model'
+
         return {
             q: querystring.parse(location.search.slice(1)),
             exampleDataHash: exampleDataHash,

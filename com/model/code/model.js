@@ -16,6 +16,15 @@ func NewID<#- v.structName #>(id <#- c.primaryKey().goType #>) ID<#- v.structNam
 func (id ID<#- v.structName #>) <#= h.toCamel(c.primaryKey().goType) #>() <#- c.primaryKey().goType #> {
     return <#- c.primaryKey().goType #>(id)
 }
+func (id ID<#- v.structName #>) IsZero() bool {
+<# if (c.primaryKey().goType.includes("int") || c.primaryKey().goType.includes("float")) {-#>
+    return id == 0
+<# } else if (c.primaryKey().goType.includes("[]")) {-#>
+    return len(id) == 0
+<# } else if (c.primaryKey().goType.includes("string")) {-#>
+    return id == ""
+<# } -#>    
+}
 <# if (c.primaryKey().goType.includes("uint")) {-#>
 func (id ID<#- v.structName #>) String() string {
     return strconv.FormatUint(uint64(id), 10)
