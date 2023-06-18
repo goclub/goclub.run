@@ -2,6 +2,8 @@ export default `package I<#- v.interfaceName #>
 
 import vd "github.com/goclub/validator"
 import "time"
+import "context"
+import m "<#- c.dir().project #>/internal/<#- c.dir().sql #>"
 
 type coreDS<#- c.signName()#> interface {
 <#if (c.needCreate()) { -#>
@@ -10,7 +12,7 @@ type coreDS<#- c.signName()#> interface {
 <# } -#>
 <#if (c.needUpdate()) { -#>
 	// Update<#- c.signName()#> 更新
-	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request, clientID m.IDClient) (err error)
+	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (err error)
 <# } -#>
 	// <#- c.signName() #>s 查询(所有)
 	<#- c.signName() #>s(ctx context.Context) (list []m.<#= v.structName #>, err error)
@@ -29,8 +31,8 @@ type coreDS<#- c.signName()#> interface {
 <# } -#>
 <# } -#>
 <# if(c.authField()) {-#>
-  Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
-  Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+    Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+    Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
 <# } -#>
 }
 <#if (c.needPaging()) { -#>  
@@ -46,7 +48,7 @@ type AdminPaging<#- c.signName()#>Request struct {
     m.Paging
 }
 type AdminPaging<#- c.signName()#>Reply struct {
-    List []Paging<#- c.signName()#>ReplyItem \`json:"list"\`
+    List []AdminPaging<#- c.signName()#>ReplyItem \`json:"list"\`
     Total uint64 \`json:"total"\`
 }
 type AdminPaging<#- c.signName()#>ReplyItem struct {
@@ -67,7 +69,7 @@ type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request struct {
     m.Paging
 }
 type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Reply struct {
-    List []Paging<#- c.signName()#>ReplyItem \`json:"list"\`
+    List []<#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem \`json:"list"\`
     Total uint64 \`json:"total"\`
 }
 type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem struct {

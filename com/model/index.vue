@@ -246,7 +246,10 @@
         </el-row>
         <div class="codeWindow">
             <div class="codeWindowHead">
-                <strong>{{ fileTitle(codeTypeTab) }}</strong>: {{ fileName(codeTypeTab) }}
+                <div class="codeWindowHeadCore"><strong>{{ fileTitle(codeTypeTab) }}</strong>: {{
+                    fileName(codeTypeTab)
+                    }}
+                </div>
             </div>
             <el-row>
                 <el-col :span="4">
@@ -255,6 +258,7 @@
                         创建所有文件
                     </el-button>
                     <div class="fileList">
+                        <div style="text-align: center;"></div>
                         <el-tree
                                 :data="fileList()"
                                 :expand-on-click-node="false"
@@ -270,6 +274,9 @@
                                              v-else>{{ data.label }}</el-link>
                                   </span>
                         </el-tree>
+                        项目目录:
+                        <el-input size="mini" :placeholder="defaultDir().project"
+                                  v-model="model.dir.project"></el-input>
                         模型目录:
                         <el-input size="mini" :placeholder="defaultDir().sql" v-model="model.dir.sql"></el-input>
                         模块目录:
@@ -344,6 +351,7 @@ const defaultModel = function () {
         isAutoIncrement: true,
         isIDTypeAlias: true,
         dir: {
+            project: '',
             sql: "",
             module: "",
             tpl: "",
@@ -496,6 +504,15 @@ export default {
                 return out;
             }
             var c = {
+                dir() {
+                    var d = vm.defaultDir()
+                    var m = vm.model.dir
+                    var out = {}
+                    Object.keys(d).forEach(function (key) {
+                        out[key] = m[key] || d[key]
+                    })
+                    return out
+                },
                 AuthFieldSign() {
                     var sign = ""
                     v.fields.some(function (item) {
@@ -865,6 +882,7 @@ export default {
         },
         defaultDir() {
             return {
+                'project': 'github.com/goclub/startup',
                 "sql": "1model",
                 "module": `${h.firstLow(this.model.interfaceName)}`,
                 "tpl": "tpl",
@@ -892,11 +910,11 @@ export default {
             var handleDir = vm.model.dir.handle || vm.defaultDir().handle
             var viewDir = vm.model.dir.view || vm.defaultDir().view
             var hash = {
-                'ibase': `internal/${moduleDir}/interface/ds.go`,
+                'ibase': `internal/${moduleDir}/interface/ids.go`,
+                "ids": `internal/${moduleDir}/interface/ids_${name}.go`,
                 'base': `internal/${moduleDir}/ds.go`,
                 "model": `internal/${tableDir}/sql_` + name + ".go",
                 "ds": `internal/${moduleDir}/ds_${name}.go`,
-                "ids": `internal/${moduleDir}/interface/ds_${name}.go`,
                 'handle': `internal/${handleDir}/handle_manager_${name}.go`,
                 'paging.html': `${tplDir}/admin/${name}.html`,
                 'view': `internal/${viewDir}/view.go`,
@@ -1205,6 +1223,10 @@ fi
     padding-left: 17%;
     line-height: 30px;
     font-size: 12px;
+}
+
+.codeWindowHeadCore {
+
 }
 
 .codeWindowHead::before {

@@ -1,9 +1,12 @@
 export default `package <#- v.interfaceName #>
 
+import "<#- c.dir().project #>/internal/<#- c.dir().module #>/interface"
 import sl "github.com/goclub/slice"
 import sq "github.com/goclub/sql"
 import xerr "github.com/goclub/error"
+import "context"
 import "time"
+import m "<#- c.dir().project #>/internal/<#- c.dir().sql #>"
 <#if (c.needCreate()) { -#>
 func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Create<#- c.signName()#>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error){
 	<#- h.firstLow(v.structName) #> = m.<#- v.structName #>{
@@ -18,9 +21,10 @@ func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interface
 }
 <# }-#>
 <#if (c.needUpdate()) { -#>
-func (dep DS) Update<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Update<#- c.signName()#>Request) (err error){
+func (dep DS) Update<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Update<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (err error){
 	col := m.Table<#- v.structName#>{}.Column()
 	var updateData = map[sq.Column]interface{}{
+<# if (c.authField()){ -#>    col.<#= c.authField().goField #>: <#- h.firstLow(c.authField().goField) #>,<# } #>
 <# c.updateFields().forEach(function (item) { -#>
 		col.<#= c.padGoField(item) #>: req.<#= item.goField -#>,
 <# }) -#>
@@ -117,8 +121,8 @@ func (dep DS) AdminPaging<#- c.signName()#>(ctx context.Context, req I<#- v.inte
     if err = dep.mysql.Main.QuerySlice(ctx, &list, qb.Paging(req.Page, req.PerPage)); err != nil {
         return
     }
-    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.Paging<#- c.signName()#>ReplyItem {
-    return I<#- v.interfaceName #>.Paging<#- c.signName()#>ReplyItem{
+    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>ReplyItem {
+    return I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>ReplyItem{
     <# c.pagingReplyFields().forEach(function (item) { -#>
         <#= c.padGoField(item) #>: v.<#= item.goField -#>,
     <# }) -#>
@@ -153,8 +157,8 @@ func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Conte
     if err = dep.mysql.Main.QuerySlice(ctx, &list, qb.Paging(req.Page, req.PerPage)); err != nil {
         return
     }
-    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.Paging<#- c.signName()#>ReplyItem {
-    return I<#- v.interfaceName #>.Paging<#- c.signName()#>ReplyItem{
+    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem {
+    return I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem{
     <# c.pagingReplyFields().forEach(function (item) { -#>
         <#= c.padGoField(item) #>: v.<#= item.goField -#>,
     <# }) -#>
@@ -165,17 +169,17 @@ func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Conte
 <# } -#>     
 <# } -#>
 <# if(c.authField()) {-#>
-func (dep DS) Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+func (dep DS) Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error){
     if <#- c.goFieldIsZero(c.authField()) #> { return xerr.Reject(1, "不能为空", false)}
     if <#= h.firstLow(v.structName) #>.<#- c.authField().goField #> != <#- h.firstLow(c.authField().goField) #> {
         return xerr.Reject(1, "数据不属于你,刷新页面后重试", false)
     }
     return
 }
-func (dep DS) Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+func (dep DS) Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error){
     col := m.<#= v.structName #>{}.Column()
     var has bool
-    if has, err = dep.mysql.Has(ctx, &m.<#= v.structName #>{}, sq.QB{
+    if has, err = dep.mysql.Main.Has(ctx, &m.<#= v.structName #>{}, sq.QB{
         Where: sq.
         And(col.<#= c.primaryKeyGoField() #>, sq.Equal(<#= c.primaryKeyGoVar() #>)).
         And(col.<#- c.authField().goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>)),
