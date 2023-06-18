@@ -496,6 +496,16 @@ export default {
                 return out;
             }
             var c = {
+                AuthFieldSign() {
+                    var sign = ""
+                    v.fields.some(function (item) {
+                        if (item.isAuth) {
+                            sign = item.goField.replace(/id$/, '').replace(/ID$/, '')
+                            return true
+                        }
+                    })
+                    return sign
+                },
                 label(item) {
                     if (item.label) {
                         return item.label
@@ -629,7 +639,7 @@ export default {
                         if (goType === "custom") {
                             goType = v.goTypeCustom
                         }
-                        return v.goField + " " + goType
+                        return v.goField + " " + goType + " " + `\`json:"${h.firstLow(c.snakeToCamel(v.column))}"\``
                     }).join("\n" + h.indent())
                 },
                 signName() {
@@ -658,6 +668,8 @@ export default {
                 pagingReqFields: function () {
                     return v.fields.filter(function (v) {
                         return v.pagingReq;
+                    }).sort(function (a, b) {
+                        return a.isAuth ? -1 : 1
                     });
                 },
                 pagingReplyFields: function () {

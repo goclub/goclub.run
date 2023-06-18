@@ -94,7 +94,7 @@ func (dep DS) Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.struc
 	}
 }
 <# if (c.needPaging()) { -#>
-func (dep DS) Paging<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Paging<#- c.signName()#>Request) (reply I<#- v.interfaceName #>.Paging<#- c.signName()#>Reply, err error){
+func (dep DS) AdminPaging<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>Request) (reply I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>Reply, err error){
 	col := m.<#= v.structName #>{}.Column()
 	var list  []m.<#- v.structName#>
 	var qb = sq.QB{
@@ -125,7 +125,44 @@ func (dep DS) Paging<#- c.signName()#>(ctx context.Context, req I<#- v.interface
     }
     })
     return
-}     
+}
+<# if (c.authField()) { -#>
+func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>Reply, err error){
+	col := m.<#= v.structName #>{}.Column()
+	var list  []m.<#- v.structName#>
+	var qb = sq.QB{
+	    Where:sq.
+<# c.pagingReqFields().forEach(function (item, index) { -#>
+<# if (item.isAuth){ -#>
+        And(col.<#= item.goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>
+<# return; } -#>
+<# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
+        And(col.<#= item.goField #>, sq.IF(req.req.Start<#= item.goField #>.IsZero() == false, sq.Between(req.Begin<#= item.goField #>, req.End<#= item.goField #>))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>,
+<# } else { -#>
+        And(col.<#= item.goField #>, sq.IF(req.<#- c.SQIFCode(item) #>, sq.<# if(item.goType == "string"){#>Like<#}else {#>Equal<#}#>(req.<#= item.goField #>)))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>
+<# } -#>
+<# }) -#>
+        OrderBy:[]sq.OrderBy{{col.ID, sq.DESC}},
+	}
+	if reply.Total, err = dep.mysql.Main.Count(ctx, &m.<#= v.structName #>{}, qb); err != nil {
+	    return
+    }
+    if reply.Total == 0 {
+        return
+    }
+    if err = dep.mysql.Main.QuerySlice(ctx, &list, qb.Paging(req.Page, req.PerPage)); err != nil {
+        return
+    }
+    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.Paging<#- c.signName()#>ReplyItem {
+    return I<#- v.interfaceName #>.Paging<#- c.signName()#>ReplyItem{
+    <# c.pagingReplyFields().forEach(function (item) { -#>
+        <#= c.padGoField(item) #>: v.<#= item.goField -#>,
+    <# }) -#>
+    }
+    })
+    return
+}
+<# } -#>     
 <# } -#>
 <# if(c.authField()) {-#>
 func (dep DS) Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)

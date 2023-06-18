@@ -23,9 +23,10 @@ type coreDS<#- c.signName()#> interface {
 	// Have<#- c.signName()#> 存在(多) 入参主键的数量与数据库中数据的数量相等则返回 true
 	Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have bool, err error)
 <# if (c.needPaging()) { -#>
-  // Paging<#- c.signName()#> 分页
-  // 注意: 此接口目前只给管理员后台使用,提供给其他角色使用需要入参加上角色对应的ID.例如 accountID, userID
-	Paging<#- c.signName()#>(ctx context.Context, req Paging<#- c.signName()#>Request) (reply Paging<#- c.signName()#>Reply, err error)
+	AdminPaging<#- c.signName()#>(ctx context.Context, req AdminPaging<#- c.signName()#>Request) (reply AdminPaging<#- c.signName()#>Reply, err error)
+<# if (c.authField()) { -#>
+	<#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Context, req <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Reply, err error)
+<# } -#>
 <# } -#>
 <# if(c.authField()) {-#>
   Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
@@ -33,31 +34,53 @@ type coreDS<#- c.signName()#> interface {
 <# } -#>
 }
 <#if (c.needPaging()) { -#>  
-type Paging<#- c.signName()#>Request struct {	
+type AdminPaging<#- c.signName()#>Request struct {	
 <# c.pagingReqFields().forEach(function (item) { -#>
 <# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
-    Start<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
-    End<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+    Start<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
+    End<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# } else { -#>
-    <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+    <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# } -#>
 <# }) -#>
     m.Paging
 }
-type Paging<#- c.signName()#>Reply struct {
+type AdminPaging<#- c.signName()#>Reply struct {
     List []Paging<#- c.signName()#>ReplyItem \`json:"list"\`
     Total uint64 \`json:"total"\`
 }
-type Paging<#- c.signName()#>ReplyItem struct {
+type AdminPaging<#- c.signName()#>ReplyItem struct {
+<# c.pagingReplyFields().forEach(function (item) { -#>
+    <#= c.padGoField(item) #> <#= c.padGoType(item, "m.") #>  \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
+<# }) -#>
+}
+<# if (c.authField()) { -#>
+type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request struct {  
+<# c.pagingReqFields().forEach(function (item) { -#><# if (item.isAuth){return} -#>
+<# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
+    Start<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
+    End<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
+<# } else { -#>
+    <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
+<# } -#>
+<# }) -#>
+    m.Paging
+}
+type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Reply struct {
+    List []Paging<#- c.signName()#>ReplyItem \`json:"list"\`
+    Total uint64 \`json:"total"\`
+}
+type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem struct {
 <# c.pagingReplyFields().forEach(function (item) { -#>
     <#= c.padGoField(item) #> <#= c.padGoType(item, "m.") #>  \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>
 }
 <# } -#>
+<# } -#>
 <#if (c.needCreate()) { -#>
 type Create<#- c.signName()#>Request struct {
 <# c.createFields().forEach(function (item) { -#>
-    <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #>
+    <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>
 }
 func (v Create<#- c.signName()#>Request) VD(r *vd.Rule) (err error) {
@@ -67,9 +90,9 @@ func (v Create<#- c.signName()#>Request) VD(r *vd.Rule) (err error) {
 <# }-#>
 <#if (c.needUpdate()) { -#>
 type Update<#- c.signName()#>Request struct {
-<#= c.primaryKeyGoStructFieldType() #>
+<#- c.primaryKeyGoStructFieldType() #>
 <# c.updateFields().forEach(function (item) { -#>
-    <#= c.padGoField(item) #><#= c.padGoType(item) #>
+    <#= c.padGoField(item) #><#= c.padGoType(item) #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>
 }
 func (v Update<#- c.signName()#>Request) VD(r *vd.Rule) (err error) {
