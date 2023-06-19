@@ -648,15 +648,19 @@ export default {
                         return h.firstLow(v.goField) + " " + goType
                     }).join(", ")
                 },
-                primaryKeyGoStructFieldType() {
+                primaryKeyGoStructFieldType(typePrefix) {
+                    typePrefix = typePrefix || ""
                     return h.indent() + v.fields.filter(function (v) {
                         return v.isPrimaryKey;
-                    }).map(function (v) {
-                        var goType = v.goType
+                    }).map(function (item) {
+                        var goType = item.goType
                         if (goType === "custom") {
-                            goType = v.goTypeCustom
+                            goType = item.goTypeCustom
                         }
-                        return v.goField + " " + goType + " " + `\`json:"${h.firstLow(c.snakeToCamel(v.column))}"\``
+                        if (v.isIDTypeAlias) {
+                            goType = typePrefix + "ID" + v.structName
+                        }
+                        return item.goField + " " + goType + " " + `\`json:"${h.firstLow(c.snakeToCamel(item.column))}"\``
                     }).join("\n" + h.indent())
                 },
                 signName() {

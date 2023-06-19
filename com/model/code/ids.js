@@ -8,11 +8,11 @@ import m "<#- c.dir().project #>/internal/<#- c.dir().sql #>"
 type coreDS<#- c.signName()#> interface {
 <#if (c.needCreate()) { -#>
 	// Create<#- c.signName()#> 创建 
-	Create<#- c.signName()#>(ctx context.Context, req Create<#- c.signName() #>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
+	Create<#- c.signName()#>(ctx context.Context, req Create<#- c.signName() #>Request<# if (c.authField()){ -#>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #><# } #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
 <# } -#>
 <#if (c.needUpdate()) { -#>
 	// Update<#- c.signName()#> 更新
-	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (err error)
+	Update<#- c.signName()#>(ctx context.Context, req Update<#- c.signName()#>Request<# if (c.authField()){ -#>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #><# } #>) (err error)
 <# } -#>
 	// <#- c.signName() #>s 查询(所有)
 	<#- c.signName() #>s(ctx context.Context) (list []m.<#= v.structName #>, err error)
@@ -22,6 +22,8 @@ type coreDS<#- c.signName()#> interface {
 	Must<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error)
 	// Has<#- c.signName()#> 存在(单)
 	Has<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (has bool, err error)
+	// MustHas<#- c.signName()#> 必定存在,不存在返回 xerr.Reject 数据不存在
+	MustHas<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (err error)
 	// Have<#- c.signName()#> 存在(多) 入参主键的数量与数据库中数据的数量相等则返回 true
 	Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have bool, err error)
 <# if (c.needPaging()) { -#>
@@ -31,8 +33,8 @@ type coreDS<#- c.signName()#> interface {
 <# } -#>
 <# } -#>
 <# if(c.authField()) {-#>
-    Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
-    Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+  Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
+  Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error)
 <# } -#>
 }
 <#if (c.needPaging()) { -#>  
@@ -81,7 +83,7 @@ type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem struct {
 <# } -#>
 <#if (c.needCreate()) { -#>
 type Create<#- c.signName()#>Request struct {
-<# c.createFields().forEach(function (item) { -#>
+<# c.createFields().forEach(function (item) { -#><# if (item.isAuth){return} -#>
     <#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>
 }
@@ -92,8 +94,8 @@ func (v Create<#- c.signName()#>Request) VD(r *vd.Rule) (err error) {
 <# }-#>
 <#if (c.needUpdate()) { -#>
 type Update<#- c.signName()#>Request struct {
-<#- c.primaryKeyGoStructFieldType() #>
-<# c.updateFields().forEach(function (item) { -#>
+<#- c.primaryKeyGoStructFieldType("m.") #>
+<# c.updateFields().forEach(function (item) { -#><# if (item.isAuth){return} -#>
     <#= c.padGoField(item) #><#= c.padGoType(item) #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>
 }

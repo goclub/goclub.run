@@ -1,6 +1,7 @@
 export default `package <#- v.interfaceName #>
 
 import "<#- c.dir().project #>/internal/<#- c.dir().module #>/interface"
+import "<#- c.dir().project #>/internal/core/reject_code"
 import sl "github.com/goclub/slice"
 import sq "github.com/goclub/sql"
 import xerr "github.com/goclub/error"
@@ -8,9 +9,10 @@ import "context"
 import "time"
 import m "<#- c.dir().project #>/internal/<#- c.dir().sql #>"
 <#if (c.needCreate()) { -#>
-func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Create<#- c.signName()#>Request) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error){
+func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Create<#- c.signName()#>Request<# if (c.authField()){ -#>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #><# } #>) (<#= h.firstLow(v.structName) #> m.<#= v.structName #>, err error){
 	<#- h.firstLow(v.structName) #> = m.<#- v.structName #>{
-<# c.createFields().forEach(function (item) { -#>
+<# if (c.authField()){ -#>    <#= c.authField().goField #>: <#- h.firstLow(c.authField().goField) #>,<# } #>
+<# c.createFields().forEach(function (item) { -#><# if (item.isAuth){return} -#>
 		<#= c.padGoField(item) #>: req.<#= item.goField -#>,
 <# }) -#>
 	}
@@ -21,17 +23,17 @@ func (dep DS) Create<#- c.signName()#>(ctx context.Context, req I<#- v.interface
 }
 <# }-#>
 <#if (c.needUpdate()) { -#>
-func (dep DS) Update<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Update<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (err error){
+func (dep DS) Update<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.Update<#- c.signName()#>Request<# if (c.authField()){ -#>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #><# } #>) (err error){
 	col := m.Table<#- v.structName#>{}.Column()
 	var updateData = map[sq.Column]interface{}{
-<# if (c.authField()){ -#>    col.<#= c.authField().goField #>: <#- h.firstLow(c.authField().goField) #>,<# } #>
-<# c.updateFields().forEach(function (item) { -#>
+<# c.updateFields().forEach(function (item) { -#><# if (item.isAuth){return} -#>
 		col.<#= c.padGoField(item) #>: req.<#= item.goField -#>,
 <# }) -#>
 	}
 	if _, err = dep.mysql.Main.Update(ctx, &m.Table<#- v.structName#>{}, sq.QB{
 		Set:   sq.SetMap(updateData),
-		Where: <#- c.primaryKeyGoSQLWhereCode(4, "req.") #>,
+		Where: <#- c.primaryKeyGoSQLWhereCode(3, "req.") #><# if (c.authField()){ #>.
+		        And(col.<#- c.authField().goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>))<# } #>,
 		Limit: 1,
 	}); err != nil {
 		return
@@ -41,7 +43,6 @@ func (dep DS) Update<#- c.signName()#>(ctx context.Context, req I<#- v.interface
 <# }-#>
 func (dep DS) <#- c.signName(v.structName) #>s(ctx context.Context) (list []m.<#- v.structName#>, err error) {
 	err = dep.mysql.Main.QuerySlice(ctx, &list, sq.QB{
-		From:			&m.Table<#- v.structName#>{},
 		WhereAllowEmpty: true,
 	})
 	if err != nil {
@@ -75,6 +76,16 @@ func (dep DS) Has<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarTy
 		Where:  <#= c.primaryKeyGoSQLWhereCode(3) #>,
 	}); err != nil {
 		return
+	}
+	return
+}
+func (dep DS) MustHas<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>) (err error){
+	var has bool
+	if has ,err = dep.Has<#- c.signName()#>(ctx, <#= c.primaryKeyGoVar() #>); err != nil {
+		return
+	}
+	if has == false {
+		return xerr.Reject(RejectCode.BaseDataNotFound, "", true)
 	}
 	return
 }
