@@ -946,7 +946,7 @@ export default {
 			const vm = this
 			var existCode = `echo -e "\\033[1;33mfail:file exist\\033[0m"`
 			if (type === 'ibase') {
-				existCode = `sed -i '' '/type DS interface {/a\\'$'\\n\''coreDS${vm.modelData(type, 'onlySignName')}\n' ${vm.fileName(type)}
+				existCode = `sed -i '' '/type DS interface {/a\\'$'\\n\''coreDS${vm.modelData('onlySignName')}\n' ${vm.fileName(type)}
     echo -e "\\033[1;32msuccess: add code\\033[0m"`
 			}
 			var code = `
