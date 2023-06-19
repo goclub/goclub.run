@@ -147,10 +147,8 @@ func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Conte
 	var list  []m.<#- v.structName#>
 	var qb = sq.QB{
 	    Where:sq.
+<# if (c.authField()){ -#>				And(col.<#= c.authField().goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>))<# } -#>
 <# c.pagingReqFields().forEach(function (item, index) { -#>
-<# if (item.isAuth){ -#>
-        And(col.<#= item.goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>
-<# return; } -#>
 <# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
         And(col.<#= item.goField #>, sq.IF(req.req.Start<#= item.goField #>.IsZero() == false, sq.Between(req.Begin<#= item.goField #>, req.End<#= item.goField #>))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>,
 <# } else { -#>

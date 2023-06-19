@@ -385,6 +385,9 @@ export default {
 			if (e === true) {
 				this.model.fields = this.model.fields.map(function (v, index) {
 					v.isAuth = index === i
+					// if (v.isAuth) {
+					// 	v.pagingReq = true
+					// }
 					return v
 				})
 			}
@@ -566,7 +569,7 @@ export default {
 							if (hasPrefix(item.goType, "*")) {
 								return `len(${item.goField}) != nil`
 							}
-							return `${item.goField}.IsZero()`
+							return `${item.goField}.IsZero() == false`
 					}
 				},
 				needCreate() {
