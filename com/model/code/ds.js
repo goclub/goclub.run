@@ -206,14 +206,7 @@ func (dep DS) <#- c.AuthFieldSign() #><#- c.signName()#>(ctx context.Context, <#
     <# }) -#>
 	}, nil
 }
-func (dep DS) Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error){
-    if <#- c.goFieldIsZero(c.authField()) #> { return xerr.Reject(1, "不能为空", false)}
-    if <#= h.firstLow(v.structName) #>.<#- c.authField().goField #> != <#- h.firstLow(c.authField().goField) #> {
-        return xerr.Reject(1, "数据不属于你,刷新页面后重试", false)
-    }
-    return
-}
-func (dep DS) Auth<#- c.signName()#>ID(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error){
+func (dep DS) Auth<#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error){
     col := m.<#= v.structName #>{}.Column()
     var has bool
     if has, err = dep.mysql.Main.Has(ctx, &m.<#= v.structName #>{}, sq.QB{
