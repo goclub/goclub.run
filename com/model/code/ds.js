@@ -186,19 +186,21 @@ func (dep DS) <#- c.AuthFieldSign() #><#- c.signName()#>s(ctx context.Context, r
 <# } -#>     
 <# } -#>
 <# if(c.authField()) {-#>
-func (dep DS) <#- c.AuthFieldSign() #><#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply <#- c.AuthFieldSign() #><#- c.signName()#>Reply, err error) {
+func (dep DS) <#- c.AuthFieldSign() #><#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>Reply, err error) {
 	col := m.<#= v.structName #>{}.Column()
-	if has<#= v.structName #>, err = dep.mysql.Main.Query(ctx, &<#= h.firstLow(v.structName) #>, sq.QB{
+	var has bool
+	v := m.<#= v.structName #>{}
+	if has, err = dep.mysql.Main.Query(ctx, &v, sq.QB{
 		Where:  <#= c.primaryKeyGoSQLWhereCode(3) #>.
 						And(col.<#= c.authField().goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>)),
 	}); err != nil {
 		return
 	}
-	if has<#= v.structName #> == false {
+	if has == false {
 		err = xerr.Reject(RejectCode.BaseDataNotFound, "", true)
 		return
 	}
-	return <#- c.AuthFieldSign() #><#- c.signName()#>Reply{
+	return I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>Reply{
 <# c.pagingReplyFields().forEach(function (item) { -#>
 			<#= item.goField #>: v.<#= item.goField -#>,
     <# }) -#>
