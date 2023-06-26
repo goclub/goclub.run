@@ -27,9 +27,10 @@ type coreDS<#- c.signName()#> interface {
 	// Have<#- c.signName()#> 存在(多) 入参主键的数量与数据库中数据的数量相等则返回 true
 	Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #>IDs []m.ID<#= v.structName #>) (have bool, err error)
 <# if (c.needPaging()) { -#>
-	AdminPaging<#- c.signName()#>(ctx context.Context, req AdminPaging<#- c.signName()#>Request) (reply AdminPaging<#- c.signName()#>Reply, err error)
+	Admin<#- c.signName()#>s(ctx context.Context, req Admin<#- c.signName()#>sRequest) (reply Admin<#- c.signName()#>sReply, err error)
 <# if (c.authField()) { -#>
-	<#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Context, req <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Reply, err error)
+	<#- c.AuthFieldSign() #><#- c.signName()#>s(ctx context.Context, req <#- c.AuthFieldSign() #><#- c.signName()#>sRequest, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply <#- c.AuthFieldSign() #><#- c.signName()#>sReply, err error)
+	<#- c.AuthFieldSign() #><#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply <#- c.AuthFieldSign() #><#- c.signName()#>Reply, err error)
 <# } -#>
 <# } -#>
 <# if(c.authField()) {-#>
@@ -38,7 +39,7 @@ type coreDS<#- c.signName()#> interface {
 <# } -#>
 }
 <#if (c.needPaging()) { -#>  
-type AdminPaging<#- c.signName()#>Request struct {	
+type Admin<#- c.signName()#>sRequest struct {	
 <# c.pagingReqFields().forEach(function (item) { -#>
 <# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
     Start<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
@@ -49,17 +50,25 @@ type AdminPaging<#- c.signName()#>Request struct {
 <# }) -#>
     m.Paging
 }
-type AdminPaging<#- c.signName()#>Reply struct {
-    List []AdminPaging<#- c.signName()#>ReplyItem \`json:"list"\`
+func (v Admin<#- c.signName()#>sRequest) VD(r *vd.Rule) (err error) {
+	// TODO implement me
+}
+type Admin<#- c.signName()#>sReply struct {
+    List []Admin<#- c.signName()#>sReplyItem \`json:"list"\`
     Total uint64 \`json:"total"\`
 }
-type AdminPaging<#- c.signName()#>ReplyItem struct {
+type Admin<#- c.signName()#>sReplyItem struct {
 <# c.pagingReplyFields().forEach(function (item) { -#>
     <#= c.padGoField(item) #> <#= c.padGoType(item, "m.") #>  \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>
 }
 <# if (c.authField()) { -#>
-type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request struct {  
+type <#- c.AuthFieldSign() #><#- c.signName()#>Reply struct {
+<# c.pagingReplyFields().forEach(function (item) { -#>
+    <#= c.padGoField(item) #> <#= c.padGoType(item, "m.") #>  \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
+<# }) -#>
+}
+type <#- c.AuthFieldSign() #><#- c.signName()#>sRequest struct {  
 <# c.pagingReqFields().forEach(function (item) { -#><# if (item.isAuth){return} -#>
 <# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
     Start<#= c.padGoField(item) #><#= c.padGoType(item, "m.") #> \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
@@ -70,11 +79,14 @@ type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request struct {
 <# }) -#>
     m.Paging
 }
-type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>Reply struct {
-    List []<#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem \`json:"list"\`
+func (v <#- c.AuthFieldSign() #><#- c.signName()#>sRequest) VD(r *vd.Rule) (err error) {
+	// TODO implement me
+}
+type <#- c.AuthFieldSign() #><#- c.signName()#>sReply struct {
+    List []<#- c.AuthFieldSign() #><#- c.signName()#>sReplyItem \`json:"list"\`
     Total uint64 \`json:"total"\`
 }
-type <#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem struct {
+type <#- c.AuthFieldSign() #><#- c.signName()#>sReplyItem struct {
 <# c.pagingReplyFields().forEach(function (item) { -#>
     <#= c.padGoField(item) #> <#= c.padGoType(item, "m.") #>  \`json:"<#= h.firstLow(c.snakeToCamel(item.column)) #>"\`
 <# }) -#>

@@ -109,10 +109,11 @@ func (dep DS) Have<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.struc
 	}
 }
 <# if (c.needPaging()) { -#>
-func (dep DS) AdminPaging<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>Request) (reply I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>Reply, err error){
+func (dep DS) Admin<#- c.signName()#>s(ctx context.Context, req I<#- v.interfaceName #>.Admin<#- c.signName()#>sRequest) (reply I<#- v.interfaceName #>.Admin<#- c.signName()#>sReply, err error){
 	col := m.<#= v.structName #>{}.Column()
 	var list  []m.<#- v.structName#>
 	var qb = sq.QB{
+<# if (c.pagingReqFields().length != 0) { -#>
 	    Where:sq.
 <# c.pagingReqFields().forEach(function (item, index) { -#>
 <# if (item.goType.toLowerCase().includes('time') || item.goType.toLowerCase().includes('date')) {-#>
@@ -121,6 +122,9 @@ func (dep DS) AdminPaging<#- c.signName()#>(ctx context.Context, req I<#- v.inte
         And(col.<#= item.goField #>, sq.IF(req.<#- c.SQIFCode(item) #>, sq.<# if(item.goType == "string"){#>Like<#}else {#>Equal<#}#>(req.<#= item.goField #>)))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>
 <# } -#>
 <# }) -#>
+<# } else { -#>
+				WhereAllowEmpty: true,
+<# } -#>
         OrderBy:[]sq.OrderBy{{col.ID, sq.DESC}},
 	}
 	if reply.Total, err = dep.mysql.Main.Count(ctx, &m.<#= v.structName #>{}, qb); err != nil {
@@ -132,20 +136,21 @@ func (dep DS) AdminPaging<#- c.signName()#>(ctx context.Context, req I<#- v.inte
     if err = dep.mysql.Main.QuerySlice(ctx, &list, qb.Paging(req.Page, req.PerPage)); err != nil {
         return
     }
-    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>ReplyItem {
-    return I<#- v.interfaceName #>.AdminPaging<#- c.signName()#>ReplyItem{
+    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.Admin<#- c.signName()#>sReplyItem {
+    return I<#- v.interfaceName #>.Admin<#- c.signName()#>sReplyItem{
     <# c.pagingReplyFields().forEach(function (item) { -#>
         <#= c.padGoField(item) #>: v.<#= item.goField -#>,
     <# }) -#>
     }
     })
-    return
+    returnP
 }
 <# if (c.authField()) { -#>
-func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Context, req I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>Request, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>Reply, err error){
+func (dep DS) <#- c.AuthFieldSign() #><#- c.signName()#>s(ctx context.Context, req I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>sRequest, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>sReply, err error){
 	col := m.<#= v.structName #>{}.Column()
 	var list  []m.<#- v.structName#>
 	var qb = sq.QB{
+<# if (c.pagingReqFields().length != 0) { -#>
 	    Where:sq.
 <# if (c.authField()){ -#>				And(col.<#= c.authField().goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>))<# } -#>
 <# c.pagingReqFields().forEach(function (item, index) { -#>
@@ -155,6 +160,9 @@ func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Conte
         And(col.<#= item.goField #>, sq.IF(req.<#- c.SQIFCode(item) #>, sq.<# if(item.goType == "string"){#>Like<#}else {#>Equal<#}#>(req.<#= item.goField #>)))<#- h.endSymbol(c.pagingReqFields(), index, ".", ",") #>
 <# } -#>
 <# }) -#>
+<# } else { -#>
+				WhereAllowEmpty: true,
+<# } -#>
         OrderBy:[]sq.OrderBy{{col.ID, sq.DESC}},
 	}
 	if reply.Total, err = dep.mysql.Main.Count(ctx, &m.<#= v.structName #>{}, qb); err != nil {
@@ -166,8 +174,8 @@ func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Conte
     if err = dep.mysql.Main.QuerySlice(ctx, &list, qb.Paging(req.Page, req.PerPage)); err != nil {
         return
     }
-    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem {
-    return I<#- v.interfaceName #>.<#- c.AuthFieldSign() #>Paging<#- c.signName()#>ReplyItem{
+    reply.List = sl.Map(list, func (v m.<#= v.structName #>) I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>sReplyItem {
+    return I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>sReplyItem{
     <# c.pagingReplyFields().forEach(function (item) { -#>
         <#= c.padGoField(item) #>: v.<#= item.goField -#>,
     <# }) -#>
@@ -178,6 +186,24 @@ func (dep DS) <#- c.AuthFieldSign() #>Paging<#- c.signName()#>(ctx context.Conte
 <# } -#>     
 <# } -#>
 <# if(c.authField()) {-#>
+func (dep DS) <#- c.AuthFieldSign() #><#- c.signName()#>(ctx context.Context, <#= c.primaryKeyGoVarType() #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply <#- c.AuthFieldSign() #><#- c.signName()#>Reply, err error) {
+	col := m.<#= v.structName #>{}.Column()
+	if has<#= v.structName #>, err = dep.mysql.Main.Query(ctx, &<#= h.firstLow(v.structName) #>, sq.QB{
+		Where:  <#= c.primaryKeyGoSQLWhereCode(3) #>.
+						And(col.<#= c.authField().goField #>, sq.Equal(<#- h.firstLow(c.authField().goField) #>)),
+	}); err != nil {
+		return
+	}
+	if has<#= v.structName #> == false {
+		err = xerr.Reject(RejectCode.BaseDataNotFound, "", true)
+		return
+	}
+	return <#- c.AuthFieldSign() #><#- c.signName()#>Reply{
+<# c.pagingReplyFields().forEach(function (item) { -#>
+			<#= item.goField #>: v.<#= item.goField -#>,
+    <# }) -#>
+	}, nil
+}
 func (dep DS) Auth<#- c.signName()#>(ctx context.Context, <#= h.firstLow(v.structName) #> m.<#= v.structName #>, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>)(err error){
     if <#- c.goFieldIsZero(c.authField()) #> { return xerr.Reject(1, "不能为空", false)}
     if <#= h.firstLow(v.structName) #>.<#- c.authField().goField #> != <#- h.firstLow(c.authField().goField) #> {
