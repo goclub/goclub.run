@@ -143,7 +143,7 @@ func (dep DS) Admin<#- c.signName()#>s(ctx context.Context, req I<#- v.interface
     <# }) -#>
     }
     })
-    returnP
+    return
 }
 <# if (c.authField()) { -#>
 func (dep DS) <#- c.AuthFieldSign() #><#- c.signName()#>s(ctx context.Context, req I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>sRequest, <#- h.firstLow(c.authField().goField) #> <#- c.goType(c.authField(), "m.")  #>) (reply I<#- v.interfaceName #>.<#- c.AuthFieldSign() #><#- c.signName()#>sReply, err error){
