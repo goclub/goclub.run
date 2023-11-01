@@ -51,6 +51,7 @@ type Admin<#- c.signName()#>sRequest struct {
 }
 func (v Admin<#- c.signName()#>sRequest) VD(r *vd.Rule) (err error) {
 	// TODO implement me
+	return
 }
 type Admin<#- c.signName()#>sReply struct {
     List []Admin<#- c.signName()#>sReplyItem \`json:"list"\`
@@ -80,6 +81,7 @@ type <#- c.AuthFieldSign() #><#- c.signName()#>sRequest struct {
 }
 func (v <#- c.AuthFieldSign() #><#- c.signName()#>sRequest) VD(r *vd.Rule) (err error) {
 	// TODO implement me
+	return
 }
 type <#- c.AuthFieldSign() #><#- c.signName()#>sReply struct {
     List []<#- c.AuthFieldSign() #><#- c.signName()#>sReplyItem \`json:"list"\`
