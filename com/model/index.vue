@@ -2,7 +2,7 @@
     <div>
         <el-form label-width="6em" size="mini">
             <el-form-item label="">
-                goclub/sql 根据表单生成 CRUD 代码,跟简单重复的工作说永别.
+                goclub/sql 根据表单生成 CRUD 代码,提高工作效率
             </el-form-item>
             <el-form-item label="参考">
                 <el-button @click="setDefaultModel">清空</el-button>&nbsp;

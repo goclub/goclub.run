@@ -95,7 +95,7 @@ export default {
                 if (repeat) {
                     return
                 }
-                this.form.history = this.form.history.concat({
+                this.form.history.unshift({
                     content: this.render,
                     time: dateFormat("yyyy-MM-dd hh:mm:ss"),
                 })
