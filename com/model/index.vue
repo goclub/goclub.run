@@ -332,7 +332,7 @@ const components = {};
 import h from "./helper.js";
 import * as querystring from "querystring";
 
-const MODEL_KEY = "goclub.run/model/v4";
+const MODEL_KEY = "goclub.run/model/v5";
 const defaultModel = function () {
 	return {
 		packageName: "m",
