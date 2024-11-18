@@ -330,7 +330,9 @@ import "highlight.js/styles/base16/solarized-light.css";
 
 const components = {};
 import h from "./helper.js";
-import * as querystring from "querystring";
+
+import * as qs from "query-string"
+
 
 const MODEL_KEY = "goclub.run/model/v5";
 const defaultModel = function () {
@@ -1067,10 +1069,10 @@ fi
 				console.log(err);
 			}
 		}
-		var codeTypeTab = querystring.parse(location.search).codeTypeTab || 'model'
+		var codeTypeTab = qs.parse(location.search).codeTypeTab || 'model'
 
 		return {
-			q: querystring.parse(location.search.slice(1)),
+			q: qs.parse(location.search.slice(1)),
 			exampleDataHash: exampleDataHash,
 			migrateName: "Migrate_" + dayjs().format("YYYY_MM_DD__hh_mm") + "_",
 			options: {
