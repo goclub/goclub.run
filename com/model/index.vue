@@ -1060,7 +1060,7 @@ fi
 	data: function () {
 		let model = defaultModel();
 		const modelData = localStorage.getItem(MODEL_KEY);
-		if (modelData) {
+		if (modelData && modelData != "undefined") {
 			try {
 				model = extend(true, model, JSON.parse(modelData))
 			} catch (err) {

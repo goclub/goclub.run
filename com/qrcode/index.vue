@@ -129,7 +129,7 @@ export default {
             history: [],
         }
         let data = localStorage.getItem(FORM_KEY)
-        if (data) {
+        if (data && data != "undefined") {
             try {
                 form = JSON.parse(data)
             } catch (err) {
